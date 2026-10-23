@@ -3,12 +3,12 @@
     #mapHost
     class="picker-map-canvas"
     role="application"
-    aria-label="Map to choose the report location">
+    aria-label="Mapa para escolher a localização do relato">
   </div>
 
   <div class="picker-hint" *ngIf="!mapError">
     <mat-icon>touch_app</mat-icon>
-    <span>Tap or drag the pin to set the exact spot</span>
+    <span>Toque ou arraste o pino para marcar o local exato</span>
   </div>
 
   <div class="picker-coordinates" *ngIf="latitude !== null && longitude !== null">
@@ -23,11 +23,11 @@
     [disabled]="isLocating"
     (click)="locateUser()">
     <mat-icon>{{ isLocating ? 'my_location' : 'near_me' }}</mat-icon>
-    <span>{{ isLocating ? 'Finding…' : 'Use my location' }}</span>
+    <span>{{ isLocating ? 'Localizando…' : 'Usar minha localização' }}</span>
   </button>
 
   <div class="picker-error" *ngIf="mapError">
     <mat-icon>cloud_off</mat-icon>
-    <span>Map unavailable. Use “Use my location”.</span>
+    <span>Mapa indisponível. Use “Usar minha localização”.</span>
   </div>
 </div>

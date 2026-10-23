@@ -18,7 +18,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Issue } from '../../../core/models/issue.model';
 import { IssueService } from '../../../core/services/issue.service';
 import { GeocodingResult, GeocodingService } from '../../../core/services/geocoding.service';
-import { NEEDS, needStyle, categoryStyle } from '../../../core/utils/issue-presentation';
+import { NEEDS, needStyle, categoryStyle, severityLabel } from '../../../core/utils/issue-presentation';
+import { addTileLayerWithFallback } from '../../../core/utils/leaflet-tiles';
 
 type LeafletModule = typeof import('leaflet');
 type LeafletMap = import('leaflet').Map;
@@ -169,7 +170,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   locateUser(): void {
     if (!this.map || this.isLocating || !navigator.geolocation) {
       if (!navigator.geolocation) {
-        this.showMessage('Location services are not available in this browser.');
+        this.showMessage('Os serviços de localização não estão disponíveis neste navegador.');
       }
       return;
     }
@@ -241,7 +242,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
         this.searchResults = results;
         this.isSearching = false;
-        this.searchStatus = results.length === 0 ? 'No place found. Try a street or city name.' : null;
+        this.searchStatus = results.length === 0 ? 'Nenhum lugar encontrado. Tente nome de rua ou cidade.' : null;
         this.changeDetector.markForCheck();
       });
     }, 350);
@@ -267,7 +268,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
       this.isSearching = false;
       this.searchResults = results;
-      this.searchStatus = results.length === 0 ? 'No place found. Try a street or city name.' : null;
+      this.searchStatus = results.length === 0 ? 'Nenhum lugar encontrado. Tente nome de rua ou cidade.' : null;
       this.changeDetector.markForCheck();
 
       if (results.length > 0) {
@@ -330,7 +331,10 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private async initializeMap(): Promise<void> {
     try {
-      const leaflet = await import('leaflet');
+      // Leaflet ships as CommonJS, so the dynamic import namespace exposes the
+      // library on `default` instead of named exports.
+      const module = await import('leaflet');
+      const leaflet = ((module as unknown as { default?: LeafletModule }).default ?? module) as LeafletModule;
 
       if (this.destroyed) {
         return;
@@ -345,11 +349,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
         zoomSnap: 0.5
       }).setView(this.defaultCenter, this.defaultZoom);
 
-      leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
-      }).addTo(this.map);
+      addTileLayerWithFallback(leaflet, this.map);
 
       leaflet.control.zoom({ position: 'bottomright' }).addTo(this.map);
       leaflet.control.scale({ imperial: false, position: 'bottomleft' }).addTo(this.map);
@@ -371,10 +371,16 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
       // Show the user's exact position as soon as the map opens (browser permission permitting).
       this.startLocationWatch();
 
-      window.setTimeout(() => this.map?.invalidateSize(), 0);
+      requestAnimationFrame(() => {
+        this.map?.invalidateSize({ animate: false });
+        this.map?.setView(this.defaultCenter, this.defaultZoom, { animate: false });
+      });
+      window.setTimeout(() => this.map?.invalidateSize({ animate: false }), 150);
+      window.setTimeout(() => this.map?.invalidateSize(), 500);
       this.changeDetector.markForCheck();
-    } catch {
-      this.showMessage('The map could not be loaded. Check your connection and try again.');
+    } catch (error) {
+      console.error('Falha ao inicializar o mapa', error);
+      this.showMessage('Não foi possível carregar o mapa. Verifique sua conexão e tente novamente.');
     }
   }
 
@@ -444,7 +450,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
         className: 'user-location-dot'
       }).addTo(layer);
 
-      this.userMarker.bindPopup('You are here');
+      this.userMarker.bindPopup('Você está aqui');
     } else {
       this.userMarker.setLatLng(point);
     }
@@ -489,7 +495,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     container.className = 'report-here-popup';
 
     const title = document.createElement('strong');
-    title.textContent = 'Report a barrier here';
+    title.textContent = 'Relatar barreira aqui';
     container.appendChild(title);
 
     const coordinates = document.createElement('span');
@@ -499,7 +505,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'report-here-button';
-    button.textContent = 'Use this location';
+    button.textContent = 'Usar este local';
     button.addEventListener('click', () => {
       this.pickLocation.emit({ latitude: latlng.lat, longitude: latlng.lng });
       map.closePopup();
@@ -534,7 +540,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
         {
           icon: this.createMarkerIcon(issue),
           title: issue.classification,
-          alt: `${issue.classification}, ${this.needLabel(issue)}, ${issue.severity} severity`,
+          alt: `${issue.classification}, ${this.needLabel(issue)}, gravidade ${severityLabel(issue.severity)}`,
           riseOnHover: true
         }
       );
@@ -583,6 +589,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const category = categoryStyle(issue.category);
     const description = this.escapeHtml(issue.description);
     const severity = this.escapeHtml(issue.severity);
+    const severityText = this.escapeHtml(severityLabel(issue.severity));
     const date = this.escapeHtml(this.formatDate(issue.createdAt));
     const coordinates = `${issue.latitude.toFixed(5)}, ${issue.longitude.toFixed(5)}`;
 
@@ -593,7 +600,7 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
         </div>
         <div class="radar-popup-card__body">
           <span class="radar-popup-card__severity radar-popup-card__severity--${severity}">
-            <i></i>${severity}
+            <i></i>Gravidade ${severityText}
           </span>
           <h3>${title}</h3>
           <div class="radar-popup-card__tags">
@@ -620,10 +627,10 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) {
-      return 'Date unavailable';
+      return 'Data indisponível';
     }
 
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('pt-BR', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -658,18 +665,18 @@ export class RadarMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private getLocationError(code: number): string {
     if (code === 1) {
-      return 'Allow location access in your browser settings, then try again.';
+      return 'Permita o acesso à localização nas configurações do navegador e tente novamente.';
     }
 
     if (code === 3) {
-      return 'Location took too long to load. Try again in a moment.';
+      return 'A localização demorou muito para carregar. Tente novamente em alguns instantes.';
     }
 
-    return 'Your location could not be found. Check your device settings and try again.';
+    return 'Não foi possível encontrar sua localização. Verifique as configurações do dispositivo e tente novamente.';
   }
 
   private showMessage(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, 'Fechar', {
       duration: 6000,
       panelClass: ['error-snackbar']
     });

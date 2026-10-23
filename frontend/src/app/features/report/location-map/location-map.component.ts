@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { addTileLayerWithFallback } from '../../../core/utils/leaflet-tiles';
 
 export interface MapLocation {
   latitude: number;
@@ -89,7 +90,7 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
   locateUser(): void {
     if (!this.map || this.isLocating || !navigator.geolocation) {
       if (!navigator.geolocation) {
-        this.snackBar.open('Location services are not available in this browser.', 'Close', {
+        this.snackBar.open('Os serviços de localização não estão disponíveis neste navegador.', 'Fechar', {
           duration: 5000,
           panelClass: ['error-snackbar']
         });
@@ -118,7 +119,7 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
       error => {
         this.isLocating = false;
         this.changeDetector.markForCheck();
-        this.snackBar.open(this.getLocationError(error.code), 'Close', {
+        this.snackBar.open(this.getLocationError(error.code), 'Fechar', {
           duration: 6000,
           panelClass: ['error-snackbar']
         });
@@ -133,7 +134,10 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private async initializeMap(): Promise<void> {
     try {
-      const leaflet = await import('leaflet');
+      // Leaflet ships as CommonJS, so the dynamic import namespace exposes the
+      // library on `default` instead of named exports.
+      const module = await import('leaflet');
+      const leaflet = ((module as unknown as { default?: LeafletModule }).default ?? module) as LeafletModule;
 
       if (this.destroyed) {
         return;
@@ -148,11 +152,7 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
         zoomSnap: 0.5
       }).setView(this.defaultCenter, this.defaultZoom);
 
-      leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
-      }).addTo(this.map);
+      addTileLayerWithFallback(leaflet, this.map);
 
       leaflet.control.zoom({ position: 'bottomright' }).addTo(this.map);
       leaflet.control.scale({ imperial: false, position: 'bottomleft' }).addTo(this.map);
@@ -171,7 +171,7 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
       this.changeDetector.markForCheck();
     } catch {
       this.mapError = true;
-      this.snackBar.open('The map could not be loaded. Use your current location instead.', 'Close', {
+      this.snackBar.open('Não foi possível carregar o mapa. Use sua localização atual.', 'Fechar', {
         duration: 6000,
         panelClass: ['error-snackbar']
       });
@@ -199,8 +199,8 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
       this.marker = leaflet.marker(location, {
         draggable: true,
         icon: this.createMarkerIcon(),
-        title: 'Selected report location',
-        alt: 'Selected report location'
+        title: 'Local selecionado para o relato',
+        alt: 'Local selecionado para o relato'
       }).addTo(map);
 
       this.marker.on('dragend', () => {
@@ -286,13 +286,13 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private getLocationError(code: number): string {
     if (code === 1) {
-      return 'Allow location access in your browser settings, then try again.';
+      return 'Permita o acesso à localização nas configurações do navegador e tente novamente.';
     }
 
     if (code === 3) {
-      return 'Location took too long to load. Try again in a moment.';
+      return 'A localização demorou muito para carregar. Tente novamente em alguns instantes.';
     }
 
-    return 'Your location could not be found. Check your device settings and try again.';
+    return 'Não foi possível encontrar sua localização. Verifique as configurações do dispositivo e tente novamente.';
   }
 }

@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Issue, IssueCategory, IssueNeed } from '../../core/models/issue.model';
 import { IssueService } from '../../core/services/issue.service';
-import { NEEDS, categoryStyle, needStyle } from '../../core/utils/issue-presentation';
+import { NEEDS, categoryStyle, needStyle, severityLabel as severityText } from '../../core/utils/issue-presentation';
 import { RadarMapComponent } from './radar-map/radar-map.component';
 import { PickedLocation } from './radar-map/radar-map.component';
 
@@ -89,18 +89,13 @@ export class DashboardComponent implements OnInit {
       counts.set(category, (counts.get(category) ?? 0) + 1);
     }
 
-    return (Object.keys(categoryStyle('other').label ? {
-      sidewalk: 1, curb_ramp: 1, tactile_paving: 1, obstruction: 1,
-      crossing: 1, public_transport: 1, other: 1
-    } : {}) as Record<IssueCategory, number> extends never ? [] : Array<IssueCategory>)
-      ? (['sidewalk', 'curb_ramp', 'tactile_paving', 'obstruction', 'crossing', 'public_transport', 'other'] as IssueCategory[])
-        .map(category => ({
-          category,
-          label: categoryStyle(category).label,
-          icon: categoryStyle(category).icon,
-          count: counts.get(category) ?? 0
-        }))
-      : [];
+    return (['sidewalk', 'curb_ramp', 'tactile_paving', 'obstruction', 'crossing', 'public_transport', 'other'] as IssueCategory[])
+      .map(category => ({
+        category,
+        label: categoryStyle(category).label,
+        icon: categoryStyle(category).icon,
+        count: counts.get(category) ?? 0
+      }));
   }
 
   categoryLabel(category: IssueCategory | string): string {
@@ -125,6 +120,10 @@ export class DashboardComponent implements OnInit {
 
   needPale(need: IssueNeed | string): string {
     return needStyle(need).pale;
+  }
+
+  severityLabel(severity: string): string {
+    return severityText(severity);
   }
 
   get latestReportDate(): Date | null {

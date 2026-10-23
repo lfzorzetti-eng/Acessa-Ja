@@ -6,12 +6,12 @@ export const routes: Routes = [
   {
     path: '',
     component: DashboardComponent,
-    title: 'Dashboard | Urban Accessibility Radar'
+    title: 'Mapa | Acessa Já'
   },
   {
     path: 'report',
     component: ReportComponent,
-    title: 'Report an issue | Urban Accessibility Radar'
+    title: 'Relatar barreira | Acessa Já'
   },
   {
     path: '**',

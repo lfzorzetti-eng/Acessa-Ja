@@ -72,7 +72,7 @@ export class ReportComponent implements OnInit {
     this.locationError = null;
 
     if (!navigator.geolocation) {
-      this.locationError = 'Location services are not available in this browser.';
+      this.locationError = 'Os serviços de localização não estão disponíveis neste navegador.';
       return;
     }
 
@@ -87,7 +87,7 @@ export class ReportComponent implements OnInit {
       this.locationRequestId += 1;
       this.locationTimeoutId = null;
       this.isLocating = false;
-      this.locationError = 'Location request timed out. Check browser permission and try again.';
+      this.locationError = 'A solicitação de localização expirou. Verifique a permissão do navegador e tente novamente.';
       this.changeDetector.markForCheck();
     }, 15000);
 
@@ -182,7 +182,7 @@ export class ReportComponent implements OnInit {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
     if (!allowedTypes.includes(file.type)) {
-      this.imageError = 'Choose a JPEG, PNG, WEBP, or GIF image.';
+      this.imageError = 'Escolha uma imagem JPEG, PNG, WEBP ou GIF.';
       if (input) {
         input.value = '';
       }
@@ -190,7 +190,7 @@ export class ReportComponent implements OnInit {
     }
 
     if (file.size > 20 * 1024 * 1024) {
-      this.imageError = 'Choose an image smaller than 20 MB.';
+      this.imageError = 'Escolha uma imagem menor que 20 MB.';
       if (input) {
         input.value = '';
       }
@@ -207,7 +207,7 @@ export class ReportComponent implements OnInit {
         this.changeDetector.markForCheck();
       })
       .catch(() => {
-        this.imageError = 'The image could not be processed. Choose another one.';
+        this.imageError = 'Não foi possível processar a imagem. Escolha outra.';
         this.isReadingImage = false;
         this.changeDetector.markForCheck();
         if (input) {
@@ -232,7 +232,7 @@ export class ReportComponent implements OnInit {
         this.imageDataUrl = null;
         this.imageName = null;
         this.changeDetector.markForCheck();
-        this.snackBar.open('Report added to the radar.', 'View on map', {
+        this.snackBar.open('Relato adicionado ao radar.', 'Ver no mapa', {
           duration: 5500,
           panelClass: ['success-snackbar']
         }).onAction().subscribe(() => {
@@ -242,7 +242,7 @@ export class ReportComponent implements OnInit {
       error: (error: unknown) => {
         this.isSubmitting = false;
         this.changeDetector.markForCheck();
-        this.snackBar.open(this.getSubmissionError(error), 'Close', {
+        this.snackBar.open(this.getSubmissionError(error), 'Fechar', {
           duration: 6000,
           panelClass: ['error-snackbar']
         });
@@ -259,41 +259,41 @@ export class ReportComponent implements OnInit {
 
   private getLocationError(code: number): string {
     if (code === 1) {
-      return 'Allow location access in your browser settings, then try again.';
+      return 'Permita o acesso à localização nas configurações do navegador e tente novamente.';
     }
 
     if (code === 3) {
-      return 'Location took too long to load. Try again in a moment.';
+      return 'A localização demorou muito para carregar. Tente novamente em alguns instantes.';
     }
 
-    return 'Your location could not be found. Check your device settings and try again.';
+    return 'Não foi possível encontrar sua localização. Verifique as configurações do dispositivo e tente novamente.';
   }
 
   private getSubmissionError(error: unknown): string {
     if (error instanceof HttpErrorResponse && error.status === 413) {
-      return 'The image is too large for the server. Try another photo.';
+      return 'A imagem é grande demais para o servidor. Tente outra foto.';
     }
 
     if (error instanceof HttpErrorResponse && error.status === 503) {
-      return 'Image analysis is not configured. Set OPENAI_API_KEY in the API environment and try again.';
+      return 'A análise de imagem não está configurada. Defina OPENAI_API_KEY no ambiente da API e tente novamente.';
     }
 
     if (error instanceof HttpErrorResponse && error.status === 502) {
-      return 'Image analysis failed. Check the AI provider connection and try again.';
+      return 'A análise de imagem falhou. Verifique a conexão com o provedor de IA e tente novamente.';
     }
 
     if (error instanceof HttpErrorResponse && error.status === 504) {
-      return 'Image analysis timed out. Try again in a moment.';
+      return 'A análise de imagem demorou demais. Tente novamente em alguns instantes.';
     }
 
     if (error instanceof HttpErrorResponse && error.status === 400) {
-      return 'The report data was rejected. Check the location and photo, then try again.';
+      return 'Os dados do relato foram recusados. Verifique o local e a foto e tente novamente.';
     }
 
     if (error instanceof HttpErrorResponse && error.status === 0) {
-      return 'The API could not be reached. Check that the backend is running.';
+      return 'Não foi possível acessar a API. Verifique se o servidor está no ar.';
     }
 
-    return 'The report could not be saved. Check the connection and try again.';
+    return 'Não foi possível salvar o relato. Verifique a conexão e tente novamente.';
   }
 }

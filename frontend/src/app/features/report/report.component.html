@@ -2,12 +2,12 @@
   <header class="report-heading">
     <a class="back-link" routerLink="/">
       <mat-icon>arrow_back</mat-icon>
-      Back to dashboard
+      Voltar ao mapa
     </a>
-    <p class="eyebrow"><span class="heading-mark"></span> Share what you see</p>
-    <h1>Help make the<br><em>route accessible.</em></h1>
+    <p class="eyebrow"><span class="heading-mark"></span> Compartilhe o que você vê</p>
+    <h1>Ajude a tornar a<br><em>rota acessível.</em></h1>
     <p class="report-intro">
-      Add a clear photo and the location. The radar will review the image with AI, identify who the barrier affects, and publish a concise field report.
+      Adicione uma foto nítida e a localização. O radar analisa a imagem com IA, identifica quem a barreira afeta e publica um relato objetivo.
     </p>
   </header>
 
@@ -18,24 +18,24 @@
           <div class="form-section-heading">
             <span class="step-icon"><mat-icon>my_location</mat-icon></span>
             <div>
-              <span class="step-label">Location</span>
-              <h2>Where is the barrier?</h2>
+              <span class="step-label">Localização</span>
+              <h2>Onde está a barreira?</h2>
             </div>
           </div>
 
-          <p class="section-copy">Use your current position, click the map below, or tap “Use this location” on any point from the dashboard map.</p>
+          <p class="section-copy">Use sua posição atual, toque no mapa abaixo ou escolha “Usar este local” em qualquer ponto do mapa do painel.</p>
 
           <div class="location-panel" [class.location-ready]="latitude !== null">
             <div class="location-symbol">
               <mat-icon>{{ latitude !== null ? 'check' : 'location_searching' }}</mat-icon>
             </div>
             <div class="location-copy">
-              <strong>{{ latitude !== null ? 'Location ready' : 'No location selected' }}</strong>
+              <strong>{{ latitude !== null ? 'Localização definida' : 'Nenhum local selecionado' }}</strong>
               <span *ngIf="latitude !== null">
                 {{ latitude | number: '1.6-6' }}, {{ longitude | number: '1.6-6' }}
               </span>
-              <span *ngIf="latitude === null">Your coordinates stay attached to this report.</span>
-              <span class="prefill-note" *ngIf="prefilledFromMap">Pre-filled from the dashboard map.</span>
+              <span *ngIf="latitude === null">Suas coordenadas ficam vinculadas a este relato.</span>
+              <span class="prefill-note" *ngIf="prefilledFromMap">Preenchido a partir do mapa do painel.</span>
             </div>
             <button
               mat-stroked-button
@@ -45,7 +45,7 @@
               (click)="captureLocation()">
               <mat-spinner *ngIf="isLocating" diameter="17"></mat-spinner>
               <mat-icon *ngIf="!isLocating">near_me</mat-icon>
-              {{ isLocating ? 'Finding you' : latitude !== null ? 'Refresh' : 'Use my location' }}
+              {{ isLocating ? 'Localizando' : latitude !== null ? 'Atualizar' : 'Usar minha localização' }}
             </button>
           </div>
 
@@ -58,7 +58,7 @@
           </div>
 
           <p class="field-error" *ngIf="locationError" role="alert">{{ locationError }}</p>
-          <p class="privacy-note"><mat-icon>lock</mat-icon> Location is used only to place this accessibility report.</p>
+          <p class="privacy-note"><mat-icon>lock</mat-icon> A localização é usada apenas para posicionar este relato de acessibilidade.</p>
         </mat-card-content>
       </mat-card>
 
@@ -67,19 +67,19 @@
           <div class="form-section-heading">
             <span class="step-icon photo-step"><mat-icon>photo_camera</mat-icon></span>
             <div>
-              <span class="step-label">Photo evidence</span>
-              <h2>Show the access issue</h2>
+              <span class="step-label">Foto da barreira</span>
+              <h2>Mostre o problema de acesso</h2>
             </div>
           </div>
 
-          <p class="section-copy">A clear street-level photo helps the AI identify who the barrier affects and why it matters.</p>
+          <p class="section-copy">Uma foto nítida, tirada na rua, ajuda a IA a identificar quem a barreira afeta e por que ela importa.</p>
 
           <input
             #imageInput
             class="visually-hidden"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            aria-label="Choose a photo of the accessibility issue"
+            aria-label="Escolha uma foto do problema de acessibilidade"
             (change)="selectImage($event)">
 
           <div
@@ -89,11 +89,11 @@
             (dragover)="onDragOver($event)"
             (dragleave)="onDragLeave($event)"
             (drop)="onDrop($event)">
-            <img *ngIf="imageDataUrl" class="image-preview" [src]="imageDataUrl" alt="Selected accessibility issue">
+            <img *ngIf="imageDataUrl" class="image-preview" [src]="imageDataUrl" alt="Problema de acessibilidade selecionado">
             <div class="upload-placeholder" *ngIf="!imageDataUrl">
               <span class="upload-icon"><mat-icon>add_a_photo</mat-icon></span>
-              <strong>{{ isReadingImage ? 'Loading photo…' : 'Drop a photo here' }}</strong>
-              <span>or choose an image from your device</span>
+              <strong>{{ isReadingImage ? 'Carregando foto…' : 'Solte uma foto aqui' }}</strong>
+              <span>ou escolha uma imagem do seu dispositivo</span>
             </div>
             <button
               mat-stroked-button
@@ -102,7 +102,7 @@
               [disabled]="isReadingImage || isSubmitting"
               (click)="imageInput.click()">
               <mat-icon>{{ imageDataUrl ? 'change_circle' : 'photo_library' }}</mat-icon>
-              {{ imageDataUrl ? 'Change photo' : 'Choose photo' }}
+              {{ imageDataUrl ? 'Trocar foto' : 'Escolher foto' }}
             </button>
           </div>
 
@@ -112,7 +112,7 @@
             <mat-icon class="file-check">check_circle</mat-icon>
           </div>
           <p class="field-error" *ngIf="imageError" role="alert">{{ imageError }}</p>
-          <p class="upload-note">JPEG, PNG, WEBP, or GIF · optimized automatically</p>
+          <p class="upload-note">JPEG, PNG, WEBP ou GIF · otimizada automaticamente</p>
         </mat-card-content>
       </mat-card>
 
@@ -123,9 +123,9 @@
         [disabled]="!canSubmit">
         <mat-spinner *ngIf="isSubmitting" diameter="19"></mat-spinner>
         <mat-icon *ngIf="!isSubmitting">send</mat-icon>
-        {{ isSubmitting ? 'Analyzing and saving' : 'Send accessibility report' }}
+        {{ isSubmitting ? 'Analisando e salvando' : 'Enviar relato de acessibilidade' }}
       </button>
-      <p class="submit-hint" *ngIf="!canSubmit && !isSubmitting">Add a location and photo to continue.</p>
+      <p class="submit-hint" *ngIf="!canSubmit && !isSubmitting">Adicione um local e uma foto para continuar.</p>
     </form>
 
     <aside class="report-aside">
@@ -139,15 +139,15 @@
         <span class="map-pin"><mat-icon>place</mat-icon></span>
       </div>
       <div class="aside-copy">
-        <span class="aside-kicker">Who it matters to</span>
-        <h2>Make barriers visible for the people who need them most.</h2>
+        <span class="aside-kicker">Para quem isso importa</span>
+        <h2>Torne as barreiras visíveis para quem mais precisa.</h2>
         <p>
-          Blocked curb ramps, missing tactile paving, and obstacles can be life-changing. The AI helps classify who is affected so communities can prioritize repairs.
+          Rampas bloqueadas, piso tátil ausente e obstáculos podem mudar a rotina de alguém. A IA ajuda a classificar quem é afetado para que a comunidade priorize os reparos.
         </p>
         <div class="aside-rule"></div>
         <div class="aside-promise">
           <mat-icon>visibility</mat-icon>
-          <span>AI identifies the accessibility category, who it's for, writes a report, and assigns severity to every photo.</span>
+          <span>A IA identifica a categoria de acessibilidade, quem é afetado, escreve o relato e atribui gravidade a cada foto.</span>
         </div>
       </div>
     </aside>

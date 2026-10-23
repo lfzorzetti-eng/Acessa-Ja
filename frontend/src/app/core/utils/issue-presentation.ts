@@ -19,64 +19,64 @@ export const NEEDS: IssueNeed[] = [
 
 export const NEED_STYLES: Record<IssueNeed, PresentationStyle & { description: string }> = {
   wheelchair: {
-    label: 'Wheelchair users',
+    label: 'Cadeirantes',
     icon: 'accessible',
     color: '#2563eb',
     pale: '#e4edff',
-    description: 'Ramps, curb cuts, steps and passages wide enough for a wheelchair or scooter.'
+    description: 'Rampas, rebaixos, degraus e passagens largas o suficiente para cadeira de rodas ou scooter.'
   },
   blind: {
-    label: 'Blind people',
+    label: 'Pessoas cegas',
     icon: 'touch_app',
     color: '#7c3aed',
     pale: '#f0e8ff',
-    description: 'Tactile paving, cane-detectable edges and obstacles at body or head height.'
+    description: 'Piso tátil, bordas detectáveis pela bengala e obstáculos na altura do corpo ou da cabeça.'
   },
   low_vision: {
-    label: 'Low vision',
+    label: 'Baixa visão',
     icon: 'visibility',
     color: '#c2410c',
     pale: '#ffeadf',
-    description: 'Contrast, visual markings and crossings that are easy to see.'
+    description: 'Contraste, sinalização visual e travessias fáceis de enxergar.'
   },
   deaf: {
-    label: 'Deaf or hard of hearing',
+    label: 'Surdos ou deficientes auditivos',
     icon: 'hearing_disabled',
     color: '#0f766e',
     pale: '#dcf5f1',
-    description: 'Visual signals and hazards that would normally be noticed by sound.'
+    description: 'Sinais visuais e perigos que normalmente seriam percebidos pelo som.'
   },
   mobility: {
-    label: 'Limited mobility',
+    label: 'Mobilidade reduzida',
     icon: 'directions_walk',
     color: '#4d7c0f',
     pale: '#edf6dc',
-    description: 'Canes, walkers, uneven surfaces, slopes and long detours.'
+    description: 'Bengalas, andadores, pisos irregulares, rampas e desvios longos.'
   },
   elderly: {
-    label: 'Older people',
+    label: 'Idosos',
     icon: 'elderly',
     color: '#a16207',
     pale: '#fbf0d4',
-    description: 'Slippery surfaces, missing handrails, rest areas and crossing time.'
+    description: 'Superfícies escorregadias, falta de corrimãos, locais para descanso e tempo de travessia.'
   },
   general: {
-    label: 'Everyone',
+    label: 'Todos',
     icon: 'groups',
     color: '#475569',
     pale: '#e9edf2',
-    description: 'A barrier that affects the general public.'
+    description: 'Barreira que afeta a população em geral.'
   }
 };
 
 const CATEGORY_STYLES: Record<IssueCategory, PresentationStyle> = {
-  sidewalk: { label: 'Sidewalk', icon: 'add_road', color: '#42695c', pale: '#e2eee7' },
-  curb_ramp: { label: 'Curb ramp', icon: 'stairs', color: '#2563eb', pale: '#e4edff' },
-  tactile_paving: { label: 'Tactile paving', icon: 'grain', color: '#7c3aed', pale: '#f0e8ff' },
-  obstruction: { label: 'Obstruction', icon: 'block', color: '#c2410c', pale: '#ffeadf' },
-  crossing: { label: 'Crossing', icon: 'traffic', color: '#a16207', pale: '#fbf0d4' },
-  public_transport: { label: 'Public transport', icon: 'directions_bus', color: '#0f766e', pale: '#dcf5f1' },
-  other: { label: 'Other need', icon: 'more_horiz', color: '#475569', pale: '#e9edf2' }
+  sidewalk: { label: 'Calçada', icon: 'add_road', color: '#42695c', pale: '#e2eee7' },
+  curb_ramp: { label: 'Rampa de acesso', icon: 'stairs', color: '#2563eb', pale: '#e4edff' },
+  tactile_paving: { label: 'Piso tátil', icon: 'grain', color: '#7c3aed', pale: '#f0e8ff' },
+  obstruction: { label: 'Obstrução', icon: 'block', color: '#c2410c', pale: '#ffeadf' },
+  crossing: { label: 'Travessia', icon: 'traffic', color: '#a16207', pale: '#fbf0d4' },
+  public_transport: { label: 'Transporte público', icon: 'directions_bus', color: '#0f766e', pale: '#dcf5f1' },
+  other: { label: 'Outra necessidade', icon: 'more_horiz', color: '#475569', pale: '#e9edf2' }
 };
 
 export function needStyle(need: IssueNeed | string | null | undefined): PresentationStyle & { description: string } {
@@ -85,4 +85,14 @@ export function needStyle(need: IssueNeed | string | null | undefined): Presenta
 
 export function categoryStyle(category: IssueCategory | string | null | undefined): PresentationStyle {
   return CATEGORY_STYLES[(category ?? 'other') as IssueCategory] ?? CATEGORY_STYLES.other;
+}
+
+const SEVERITY_LABELS: Record<string, string> = {
+  low: 'baixa',
+  medium: 'média',
+  high: 'alta'
+};
+
+export function severityLabel(severity: string | null | undefined): string {
+  return SEVERITY_LABELS[(severity ?? 'low').toLowerCase()] ?? 'baixa';
 }

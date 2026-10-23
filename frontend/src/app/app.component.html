@@ -1,16 +1,14 @@
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand" routerLink="/" aria-label="Urban Accessibility Radar home">
-      <span class="brand-mark">
-        <mat-icon>pin_drop</mat-icon>
-      </span>
+    <a class="brand" routerLink="/" aria-label="Acessa Já - Página inicial">
+      <img src="logo.svg" alt="Acessa Já" class="brand-logo" />
       <span class="brand-copy">
-        <strong>Urban Accessibility</strong>
-        <span>Radar</span>
+        <strong>Acessa Já</strong>
+        <span>Radar de Acessibilidade</span>
       </span>
     </a>
 
-    <nav class="main-nav" aria-label="Main navigation">
+    <nav class="main-nav" aria-label="Navegação principal">
       <a
         mat-button
         routerLink="/"
@@ -24,13 +22,13 @@
         routerLink="/report"
         routerLinkActive="active-link">
         <mat-icon>add_location_alt</mat-icon>
-        <span>Report an issue</span>
+        <span>Relatar barreira</span>
       </a>
     </nav>
 
     <a mat-flat-button class="accent-button topbar-action" routerLink="/report">
       <mat-icon>add</mat-icon>
-      <span>New report</span>
+      <span>Novo relato</span>
     </a>
   </header>
 
@@ -39,7 +37,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>Every clear path starts with a report.</span>
-    <span class="footer-mark"><mat-icon>location_on</mat-icon> Safer streets, block by block</span>
+    <span>Cada caminho livre começa com um relato.</span>
+    <span class="footer-mark"><mat-icon>location_on</mat-icon> Ruas mais seguras, bairro por bairro</span>
   </footer>
 </div>

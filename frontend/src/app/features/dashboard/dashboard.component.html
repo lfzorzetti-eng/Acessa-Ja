@@ -1,59 +1,59 @@
 <section class="dashboard-page">
   <header class="page-heading">
     <div class="heading-copy">
-      <p class="eyebrow"><span class="live-dot"></span> Community street watch</p>
-      <h1>Make every route<br><em>easier to take.</em></h1>
+      <p class="eyebrow"><span class="live-dot"></span> Observatório da comunidade</p>
+      <h1>Torne cada rota<br><em>mais acessível.</em></h1>
       <p class="heading-description">
-        Find barriers by the people they impact. Browse the map, filter by accessibility need, and add reports from street level.
+        Encontre barreiras pelo impacto que causam. Navegue pelo mapa, filtre por quem é afetado e adicione relatos diretamente na rua.
       </p>
     </div>
     <a mat-flat-button class="accent-button heading-action" routerLink="/report">
       <mat-icon>photo_camera</mat-icon>
-      Report a barrier
+      Relatar uma barreira
     </a>
   </header>
 
-  <section class="overview-grid" aria-label="Issue summary">
+  <section class="overview-grid" aria-label="Resumo dos relatos">
     <article class="overview-card overview-total">
       <div class="overview-icon"><mat-icon>location_on</mat-icon></div>
       <div>
-        <span class="overview-label">Reports on the radar</span>
+        <span class="overview-label">Relatos no radar</span>
         <strong>{{ issues.length }}</strong>
       </div>
-      <span class="overview-note">community reports</span>
+      <span class="overview-note">relatos da comunidade</span>
     </article>
 
     <article class="overview-card overview-high">
       <div class="overview-icon"><mat-icon>priority_high</mat-icon></div>
       <div>
-        <span class="overview-label">Needs attention</span>
+        <span class="overview-label">Precisam de atenção</span>
         <strong>{{ highSeverityCount }}</strong>
       </div>
-      <span class="overview-note">high severity</span>
+      <span class="overview-note">gravidade alta</span>
     </article>
 
     <article class="overview-card overview-latest">
       <div class="overview-icon"><mat-icon>schedule</mat-icon></div>
       <div>
-        <span class="overview-label">Latest activity</span>
-        <strong>{{ latestReportDate ? (latestReportDate | date: 'MMM d') : '—' }}</strong>
+        <span class="overview-label">Última atividade</span>
+        <strong>{{ latestReportDate ? (latestReportDate | date: 'd MMM') : '—' }}</strong>
       </div>
-      <span class="overview-note">most recent report</span>
+      <span class="overview-note">relato mais recente</span>
     </article>
   </section>
 
-  <section class="need-section" aria-label="Reports by accessibility need">
+  <section class="need-section" aria-label="Relatos por quem é afetado">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Who it affects</p>
-        <h2>Filter by accessibility need</h2>
+        <p class="eyebrow">Quem é afetado</p>
+        <h2>Filtrar por necessidade de acessibilidade</h2>
       </div>
       <button
         type="button"
         class="clear-filters"
         *ngIf="selectedNeed || selectedCategory"
         (click)="clearFilters()">
-        Clear filters
+        Limpar filtros
       </button>
     </div>
     <div class="need-grid">
@@ -69,18 +69,18 @@
         <span class="need-icon"><mat-icon>{{ item.icon }}</mat-icon></span>
         <span class="need-copy">
           <strong>{{ item.label }}</strong>
-          <span>{{ item.count }} {{ item.count === 1 ? 'report' : 'reports' }}</span>
+          <span>{{ item.count }} {{ item.count === 1 ? 'relato' : 'relatos' }}</span>
         </span>
         <mat-icon class="need-check" *ngIf="selectedNeed === item.need">check_circle</mat-icon>
       </button>
     </div>
   </section>
 
-  <section class="category-section" aria-label="Reports by type">
+  <section class="category-section" aria-label="Relatos por tipo de barreira">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Barrier type</p>
-        <h2>What was reported</h2>
+        <p class="eyebrow">Tipo de barreira</p>
+        <h2>O que foi relatado</h2>
       </div>
     </div>
     <div class="category-grid">
@@ -101,14 +101,14 @@
   <section class="map-section" aria-labelledby="map-heading">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Live map</p>
-        <h2 id="map-heading">Your location, reports and routes</h2>
-        <p class="section-subcopy">Shows your position in real time. Click anywhere on the map to report a barrier at that spot.</p>
+        <p class="eyebrow">Mapa ao vivo</p>
+        <h2 id="map-heading">Sua localização, relatos e rotas</h2>
+        <p class="section-subcopy">Mostra sua posição em tempo real. Toque em qualquer ponto do mapa para relatar uma barreira ali.</p>
       </div>
       <div class="map-summary">
         <mat-icon>location_on</mat-icon>
-        <span>{{ issues.length }} {{ issues.length === 1 ? 'report' : 'reports' }} plotted</span>
-        <span class="filter-pill" *ngIf="selectedNeedLabel">Filtering: {{ selectedNeedLabel }}</span>
+        <span>{{ issues.length }} {{ issues.length === 1 ? 'relato' : 'relatos' }} no mapa</span>
+        <span class="filter-pill" *ngIf="selectedNeedLabel">Filtrando: {{ selectedNeedLabel }}</span>
       </div>
     </div>
 
@@ -118,28 +118,28 @@
   <section class="activity-section">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Field notes</p>
-        <h2>Recent reports</h2>
-        <p class="section-subcopy" *ngIf="selectedNeed || selectedCategory">Showing {{ filteredIssues.length }} of {{ issues.length }} reports</p>
+        <p class="eyebrow">Relatos de rua</p>
+        <h2>Relatos recentes</h2>
+        <p class="section-subcopy" *ngIf="selectedNeed || selectedCategory">Exibindo {{ filteredIssues.length }} de {{ issues.length }} relatos</p>
       </div>
       <div class="report-count">
         <span class="count-line"></span>
-        <span>{{ filteredIssues.length }} {{ filteredIssues.length === 1 ? 'report' : 'reports' }}</span>
+        <span>{{ filteredIssues.length }} {{ filteredIssues.length === 1 ? 'relato' : 'relatos' }}</span>
       </div>
     </div>
 
     <div class="loading-state" *ngIf="isLoading" role="status">
       <mat-spinner diameter="38"></mat-spinner>
-      <span>Reading the latest street reports…</span>
+      <span>Carregando os últimos relatos…</span>
     </div>
 
     <section class="error-state" *ngIf="hasError" role="alert">
       <mat-icon>cloud_off</mat-icon>
       <div>
-        <h3>The radar could not load reports</h3>
-        <p>Check that the API and database are running, then try again.</p>
+        <h3>Não foi possível carregar os relatos</h3>
+        <p>Verifique se a API e o banco de dados estão funcionando e tente novamente.</p>
       </div>
-      <button mat-stroked-button type="button" (click)="loadIssues()">Try again</button>
+      <button mat-stroked-button type="button" (click)="loadIssues()">Tentar novamente</button>
     </section>
 
     <section class="empty-state" *ngIf="!isLoading && !hasError && issues.length === 0">
@@ -149,22 +149,22 @@
         <span class="empty-sun"></span>
       </div>
       <div class="empty-copy">
-        <p class="eyebrow">A clear map is a good start</p>
-        <h3>No reports yet</h3>
-        <p>Share a photo of a blocked ramp, broken sidewalk, or another barrier on your route.</p>
+        <p class="eyebrow">Um mapa limpo é um bom começo</p>
+        <h3>Ainda não há relatos</h3>
+        <p>Compartilhe uma foto de uma rampa bloqueada, calçada quebrada ou outra barreira no seu caminho.</p>
         <a mat-flat-button class="accent-button" routerLink="/report">
           <mat-icon>add_a_photo</mat-icon>
-          Add the first report
+          Adicionar primeiro relato
         </a>
       </div>
     </section>
 
     <section class="empty-state filtered-empty" *ngIf="!isLoading && !hasError && issues.length > 0 && filteredIssues.length === 0">
       <div class="empty-copy">
-        <p class="eyebrow">No matches</p>
-        <h3>No reports match these filters</h3>
-        <p>Try removing the filters to see all reports on the map and list.</p>
-        <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
+        <p class="eyebrow">Sem resultados</p>
+        <h3>Nenhum relato corresponde a esses filtros</h3>
+        <p>Remova os filtros para ver todos os relatos no mapa e na lista.</p>
+        <button mat-stroked-button type="button" (click)="clearFilters()">Limpar filtros</button>
       </div>
     </section>
 
@@ -174,14 +174,14 @@
           <img [src]="imageUrl(issue)" [alt]="issue.classification">
           <span class="severity-badge" [ngClass]="'severity-' + issue.severity">
             <span class="severity-dot"></span>
-            {{ issue.severity }}
+            Gravidade {{ severityLabel(issue.severity) }}
           </span>
         </div>
         <mat-card-content>
           <div class="issue-meta">
-            <span>{{ issue.createdAt | date: 'MMM d, y · h:mm a' }}</span>
+            <span>{{ issue.createdAt | date: 'dd MMM yyyy · HH:mm' }}</span>
             <span class="meta-divider"></span>
-            <span>AI reviewed</span>
+            <span>Analisado por IA</span>
           </div>
           <h3>{{ issue.classification }}</h3>
           <div class="issue-tags">
@@ -201,10 +201,10 @@
             <button
               type="button"
               class="map-focus"
-              [attr.aria-label]="'Show ' + issue.classification + ' on the map'"
+              [attr.aria-label]="'Mostrar ' + issue.classification + ' no mapa'"
               (click)="focusOnMap(issue)">
               <mat-icon>map</mat-icon>
-              <span>Map</span>
+              <span>Mapa</span>
             </button>
           </div>
         </mat-card-content>
