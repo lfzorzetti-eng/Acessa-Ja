@@ -17,6 +17,13 @@ const ATTRIBUTION =
  */
 const PROVIDERS: TileProvider[] = [
   {
+    url: 'https://tiles.openfreemap.org/planet/{z}/{x}/{y}.png',
+    options: {
+      maxZoom: 19,
+      attribution: `${ATTRIBUTION} contributors &copy; <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>`
+    }
+  },
+  {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     options: {
       subdomains: 'abcd',
