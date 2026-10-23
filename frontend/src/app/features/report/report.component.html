@@ -7,7 +7,7 @@
     <p class="eyebrow"><span class="heading-mark"></span> Share what you see</p>
     <h1>Help make the<br><em>route accessible.</em></h1>
     <p class="report-intro">
-      Add a clear photo and the location. The radar will review the image and publish a concise field report.
+      Add a clear photo and the location. The radar will review the image with AI, identify who the barrier affects, and publish a concise field report.
     </p>
   </header>
 
@@ -23,18 +23,19 @@
             </div>
           </div>
 
-          <p class="section-copy">Use your current position to place this report on the radar.</p>
+          <p class="section-copy">Use your current position, click the map below, or tap “Use this location” on any point from the dashboard map.</p>
 
           <div class="location-panel" [class.location-ready]="latitude !== null">
             <div class="location-symbol">
               <mat-icon>{{ latitude !== null ? 'check' : 'location_searching' }}</mat-icon>
             </div>
             <div class="location-copy">
-              <strong>{{ latitude !== null ? 'Location captured' : 'No location selected' }}</strong>
+              <strong>{{ latitude !== null ? 'Location ready' : 'No location selected' }}</strong>
               <span *ngIf="latitude !== null">
-                {{ latitude | number: '1.5-5' }}, {{ longitude | number: '1.5-5' }}
+                {{ latitude | number: '1.6-6' }}, {{ longitude | number: '1.6-6' }}
               </span>
               <span *ngIf="latitude === null">Your coordinates stay attached to this report.</span>
+              <span class="prefill-note" *ngIf="prefilledFromMap">Pre-filled from the dashboard map.</span>
             </div>
             <button
               mat-stroked-button
@@ -47,6 +48,15 @@
               {{ isLocating ? 'Finding you' : latitude !== null ? 'Refresh' : 'Use my location' }}
             </button>
           </div>
+
+          <div class="map-picker">
+            <uar-location-map
+              [latitude]="latitude"
+              [longitude]="longitude"
+              (locationChange)="onMapLocationChange($event)">
+            </uar-location-map>
+          </div>
+
           <p class="field-error" *ngIf="locationError" role="alert">{{ locationError }}</p>
           <p class="privacy-note"><mat-icon>lock</mat-icon> Location is used only to place this accessibility report.</p>
         </mat-card-content>
@@ -62,7 +72,7 @@
             </div>
           </div>
 
-          <p class="section-copy">A clear street-level photo helps the AI describe the barrier.</p>
+          <p class="section-copy">A clear street-level photo helps the AI identify who the barrier affects and why it matters.</p>
 
           <input
             #imageInput
@@ -129,15 +139,15 @@
         <span class="map-pin"><mat-icon>place</mat-icon></span>
       </div>
       <div class="aside-copy">
-        <span class="aside-kicker">A clearer picture</span>
-        <h2>One small report can open up a whole route.</h2>
+        <span class="aside-kicker">Who it matters to</span>
+        <h2>Make barriers visible for the people who need them most.</h2>
         <p>
-          Blocked curb ramps, uneven paving, and obstacles can change how people move through their neighborhood.
+          Blocked curb ramps, missing tactile paving, and obstacles can be life-changing. The AI helps classify who is affected so communities can prioritize repairs.
         </p>
         <div class="aside-rule"></div>
         <div class="aside-promise">
           <mat-icon>visibility</mat-icon>
-          <span>AI adds a consistent description and severity to every photo.</span>
+          <span>AI identifies the accessibility category, who it's for, writes a report, and assigns severity to every photo.</span>
         </div>
       </div>
     </aside>

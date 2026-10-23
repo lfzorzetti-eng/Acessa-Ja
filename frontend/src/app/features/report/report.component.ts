@@ -1,14 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IssueService } from '../../core/services/issue.service';
 import { compressImage } from '../../core/utils/image-compression';
+import { LocationMapComponent, MapLocation } from './location-map/location-map.component';
 
 @Component({
   selector: 'uar-report',
@@ -17,6 +18,7 @@ import { compressImage } from '../../core/utils/image-compression';
     CommonModule,
     MatButtonModule,
     MatCardModule,
+    LocationMapComponent,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
@@ -25,10 +27,12 @@ import { compressImage } from '../../core/utils/image-compression';
   templateUrl: './report.component.html',
   styleUrl: './report.component.scss'
 })
-export class ReportComponent {
+export class ReportComponent implements OnInit {
   private readonly issueService = inject(IssueService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private locationRequestId = 0;
   private locationTimeoutId: number | null = null;
 
@@ -42,12 +46,26 @@ export class ReportComponent {
   isReadingImage = false;
   isSubmitting = false;
   isDragging = false;
+  prefilledFromMap = false;
 
   get canSubmit(): boolean {
     return this.latitude !== null &&
       this.longitude !== null &&
       this.imageDataUrl !== null &&
       !this.isSubmitting;
+  }
+
+  ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const lat = Number(params.get('lat'));
+    const lng = Number(params.get('lng'));
+
+    if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      this.latitude = lat;
+      this.longitude = lng;
+      this.prefilledFromMap = true;
+      this.changeDetector.markForCheck();
+    }
   }
 
   captureLocation(): void {
@@ -82,6 +100,7 @@ export class ReportComponent {
         this.clearLocationTimeout();
         this.latitude = position.coords.latitude;
         this.longitude = position.coords.longitude;
+        this.prefilledFromMap = false;
         this.locationError = null;
         this.isLocating = false;
         this.changeDetector.markForCheck();
@@ -102,6 +121,14 @@ export class ReportComponent {
         maximumAge: 60000
       }
     );
+  }
+
+  onMapLocationChange(location: MapLocation): void {
+    this.latitude = location.latitude;
+    this.longitude = location.longitude;
+    this.prefilledFromMap = false;
+    this.locationError = null;
+    this.changeDetector.markForCheck();
   }
 
   selectImage(event: Event): void {
@@ -200,14 +227,16 @@ export class ReportComponent {
       longitude: this.longitude,
       imageBase64: this.imageDataUrl
     }).subscribe({
-      next: () => {
+      next: issue => {
         this.isSubmitting = false;
         this.imageDataUrl = null;
         this.imageName = null;
         this.changeDetector.markForCheck();
-        this.snackBar.open('Report added to the radar.', 'Close', {
-          duration: 4500,
+        this.snackBar.open('Report added to the radar.', 'View on map', {
+          duration: 5500,
           panelClass: ['success-snackbar']
+        }).onAction().subscribe(() => {
+          void this.router.navigate(['/'], { queryParams: { focus: issue.id } });
         });
       },
       error: (error: unknown) => {

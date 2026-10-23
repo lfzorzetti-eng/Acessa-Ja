@@ -5,11 +5,41 @@ import { normalizeImage } from './images.js';
 import { analyzeImage } from './vision.js';
 
 const MAXIMUM_PAGE_SIZE = 50;
+const NEEDS = new Set([
+  'wheelchair',
+  'blind',
+  'low_vision',
+  'deaf',
+  'mobility',
+  'elderly',
+  'general',
+]);
+const CATEGORY_DEFAULT_NEED = {
+  sidewalk: 'mobility',
+  curb_ramp: 'wheelchair',
+  tactile_paving: 'blind',
+  obstruction: 'mobility',
+  crossing: 'low_vision',
+  public_transport: 'mobility',
+  other: 'general',
+};
+
+function normalizeNeed(value, category) {
+  if (typeof value === 'string' && NEEDS.has(value)) {
+    return value;
+  }
+
+  return CATEGORY_DEFAULT_NEED[category] ?? 'general';
+}
 
 function toSummary(document) {
+  const category = document.category ?? document.Category ?? 'other';
+
   return {
     id: document._id,
     classification: document.classification ?? document.Classification ?? '',
+    category,
+    need: normalizeNeed(document.need ?? document.Need, category),
     severity: document.severity ?? document.Severity ?? 'low',
     description: document.description ?? document.Description ?? '',
     latitude: document.latitude ?? document.Latitude ?? 0,
@@ -149,6 +179,8 @@ export function registerRoutes(app) {
       const issue = {
         _id: randomUUID(),
         classification: analysis.classification,
+        category: analysis.category,
+        need: analysis.need,
         severity: analysis.severity,
         description: analysis.description,
         latitude,

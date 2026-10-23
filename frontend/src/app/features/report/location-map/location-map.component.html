@@ -1,0 +1,33 @@
+<div class="picker-map-shell">
+  <div
+    #mapHost
+    class="picker-map-canvas"
+    role="application"
+    aria-label="Map to choose the report location">
+  </div>
+
+  <div class="picker-hint" *ngIf="!mapError">
+    <mat-icon>touch_app</mat-icon>
+    <span>Tap or drag the pin to set the exact spot</span>
+  </div>
+
+  <div class="picker-coordinates" *ngIf="latitude !== null && longitude !== null">
+    <mat-icon>place</mat-icon>
+    <span>{{ latitude | number: '1.6-6' }}, {{ longitude | number: '1.6-6' }}</span>
+  </div>
+
+  <button
+    type="button"
+    class="picker-locate"
+    *ngIf="!mapError"
+    [disabled]="isLocating"
+    (click)="locateUser()">
+    <mat-icon>{{ isLocating ? 'my_location' : 'near_me' }}</mat-icon>
+    <span>{{ isLocating ? 'Finding…' : 'Use my location' }}</span>
+  </button>
+
+  <div class="picker-error" *ngIf="mapError">
+    <mat-icon>cloud_off</mat-icon>
+    <span>Map unavailable. Use “Use my location”.</span>
+  </div>
+</div>

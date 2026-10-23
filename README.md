@@ -14,6 +14,7 @@ O projeto transforma uma foto de rua em um dado estruturado e utilizável. Em ve
 
 - uma **classificação curta** da barreira (por exemplo, `Broken sidewalk`, `Blocked curb ramp`, `Missing tactile paving` ou `Obstructed walkway`);
 - uma **severidade** (`low`, `medium` ou `high`);
+- uma **categoria de necessidade** (`sidewalk`, `curb_ramp`, `tactile_paving`, `obstruction`, `crossing`, `public_transport` ou `other`);
 - uma **descrição** baseada apenas no que está visível na imagem;
 - a **localização** e a **foto** do problema.
 

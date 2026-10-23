@@ -1,0 +1,87 @@
+<div class="map-shell" [class.is-fullscreen]="isFullscreen">
+  <div
+    #mapHost
+    class="map-canvas"
+    role="application"
+    aria-label="Interactive map of accessibility reports">
+  </div>
+
+  <div class="map-search">
+    <mat-icon class="search-icon">{{ isSearching ? 'hourglass_top' : 'search' }}</mat-icon>
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Search a street, neighborhood or city"
+      aria-label="Search for a place on the map"
+      [value]="searchQuery"
+      (input)="onSearchInput($any($event.target).value)"
+      (keydown.enter)="$event.preventDefault(); submitSearch()">
+    <button
+      type="button"
+      class="search-clear"
+      *ngIf="searchQuery"
+      aria-label="Clear map search"
+      (click)="clearSearch()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="search-results" *ngIf="searchResults.length > 0 || searchStatus">
+      <button
+        type="button"
+        class="search-result"
+        *ngFor="let result of searchResults"
+        [title]="result.displayName"
+        (click)="selectSearchResult(result)">
+        <mat-icon>place</mat-icon>
+        <span>{{ result.displayName }}</span>
+      </button>
+      <p class="search-status" *ngIf="searchStatus">{{ searchStatus }}</p>
+    </div>
+  </div>
+
+  <div class="map-toolbar" role="toolbar" aria-label="Map controls">
+    <button
+      type="button"
+      class="map-control"
+      [disabled]="isLocating"
+      [attr.aria-label]="isLocating ? 'Finding your location' : 'Center map on my location'"
+      [title]="isLocating ? 'Finding your location' : 'My location'"
+      (click)="locateUser()">
+      <mat-icon>{{ isLocating ? 'my_location' : 'near_me' }}</mat-icon>
+    </button>
+    <button
+      type="button"
+      class="map-control"
+      aria-label="Fit all reports and my location on the map"
+      title="Fit reports"
+      (click)="fitReports()">
+      <mat-icon>fit_screen</mat-icon>
+    </button>
+    <button
+      type="button"
+      class="map-control"
+      [attr.aria-label]="isFullscreen ? 'Exit full screen map' : 'Open full screen map'"
+      [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
+      (click)="toggleFullscreen()">
+      <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+  </div>
+
+  <div class="map-legend" aria-label="Map legend">
+    <span class="legend-title">Need</span>
+    <span class="legend-item" *ngFor="let item of needLegend">
+      <i class="legend-dot" [style.background]="item.color"></i>{{ item.label }}
+    </span>
+    <span class="legend-severity">Dot = severity</span>
+  </div>
+
+  <div class="map-hint" *ngIf="issues.length > 0">
+    <mat-icon>touch_app</mat-icon>
+    <span>Tap the map to report a barrier at that point</span>
+  </div>
+
+  <div class="map-empty" *ngIf="issues.length === 0">
+    <mat-icon>map</mat-icon>
+    <span>No reports to show on the map</span>
+  </div>
+</div>

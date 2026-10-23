@@ -4,7 +4,7 @@
       <p class="eyebrow"><span class="live-dot"></span> Community street watch</p>
       <h1>Make every route<br><em>easier to take.</em></h1>
       <p class="heading-description">
-        Find the barriers people encounter on foot, then help make them visible.
+        Find barriers by the people they impact. Browse the map, filter by accessibility need, and add reports from street level.
       </p>
     </div>
     <a mat-flat-button class="accent-button heading-action" routerLink="/report">
@@ -42,15 +42,89 @@
     </article>
   </section>
 
+  <section class="need-section" aria-label="Reports by accessibility need">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Who it affects</p>
+        <h2>Filter by accessibility need</h2>
+      </div>
+      <button
+        type="button"
+        class="clear-filters"
+        *ngIf="selectedNeed || selectedCategory"
+        (click)="clearFilters()">
+        Clear filters
+      </button>
+    </div>
+    <div class="need-grid">
+      <button
+        type="button"
+        class="need-card"
+        *ngFor="let item of needCounts"
+        [class.active]="selectedNeed === item.need"
+        [style.--need-color]="item.color"
+        [style.--need-pale]="item.pale"
+        [attr.aria-pressed]="selectedNeed === item.need"
+        (click)="toggleNeed(item.need)">
+        <span class="need-icon"><mat-icon>{{ item.icon }}</mat-icon></span>
+        <span class="need-copy">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.count }} {{ item.count === 1 ? 'report' : 'reports' }}</span>
+        </span>
+        <mat-icon class="need-check" *ngIf="selectedNeed === item.need">check_circle</mat-icon>
+      </button>
+    </div>
+  </section>
+
+  <section class="category-section" aria-label="Reports by type">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Barrier type</p>
+        <h2>What was reported</h2>
+      </div>
+    </div>
+    <div class="category-grid">
+      <button
+        type="button"
+        class="category-chip"
+        *ngFor="let item of categoryCounts"
+        [class.active]="selectedCategory === item.category"
+        [attr.aria-pressed]="selectedCategory === item.category"
+        (click)="toggleCategory(item.category)">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+        <strong>{{ item.count }}</strong>
+      </button>
+    </div>
+  </section>
+
+  <section class="map-section" aria-labelledby="map-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Live map</p>
+        <h2 id="map-heading">Your location, reports and routes</h2>
+        <p class="section-subcopy">Shows your position in real time. Click anywhere on the map to report a barrier at that spot.</p>
+      </div>
+      <div class="map-summary">
+        <mat-icon>location_on</mat-icon>
+        <span>{{ issues.length }} {{ issues.length === 1 ? 'report' : 'reports' }} plotted</span>
+        <span class="filter-pill" *ngIf="selectedNeedLabel">Filtering: {{ selectedNeedLabel }}</span>
+      </div>
+    </div>
+
+    <uar-radar-map #radarMap [issues]="filteredIssues" (pickLocation)="onMapPickLocation($event)"></uar-radar-map>
+  </section>
+
   <section class="activity-section">
     <div class="section-heading">
       <div>
         <p class="eyebrow">Field notes</p>
         <h2>Recent reports</h2>
+        <p class="section-subcopy" *ngIf="selectedNeed || selectedCategory">Showing {{ filteredIssues.length }} of {{ issues.length }} reports</p>
       </div>
       <div class="report-count">
         <span class="count-line"></span>
-        <span>{{ issues.length }} {{ issues.length === 1 ? 'report' : 'reports' }}</span>
+        <span>{{ filteredIssues.length }} {{ filteredIssues.length === 1 ? 'report' : 'reports' }}</span>
       </div>
     </div>
 
@@ -85,8 +159,17 @@
       </div>
     </section>
 
-    <div class="issue-grid" *ngIf="!isLoading && !hasError && issues.length > 0">
-      <mat-card class="issue-card" *ngFor="let issue of issues">
+    <section class="empty-state filtered-empty" *ngIf="!isLoading && !hasError && issues.length > 0 && filteredIssues.length === 0">
+      <div class="empty-copy">
+        <p class="eyebrow">No matches</p>
+        <h3>No reports match these filters</h3>
+        <p>Try removing the filters to see all reports on the map and list.</p>
+        <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    </section>
+
+    <div class="issue-grid" *ngIf="!isLoading && !hasError && filteredIssues.length > 0">
+      <mat-card class="issue-card" *ngFor="let issue of filteredIssues">
         <div class="issue-image">
           <img [src]="imageUrl(issue)" [alt]="issue.classification">
           <span class="severity-badge" [ngClass]="'severity-' + issue.severity">
@@ -101,10 +184,28 @@
             <span>AI reviewed</span>
           </div>
           <h3>{{ issue.classification }}</h3>
+          <div class="issue-tags">
+            <span class="issue-need" [style.--need-color]="needColor(issue.need)" [style.--need-pale]="needPale(issue.need)">
+              <mat-icon>{{ needIcon(issue.need) }}</mat-icon>
+              {{ needLabel(issue.need) }}
+            </span>
+            <span class="issue-category">
+              <mat-icon>{{ categoryIcon(issue.category) }}</mat-icon>
+              {{ categoryLabel(issue.category) }}
+            </span>
+          </div>
           <p class="issue-description">{{ issue.description }}</p>
           <div class="issue-location">
             <mat-icon>near_me</mat-icon>
             <span>{{ issue.latitude | number: '1.4-4' }}, {{ issue.longitude | number: '1.4-4' }}</span>
+            <button
+              type="button"
+              class="map-focus"
+              [attr.aria-label]="'Show ' + issue.classification + ' on the map'"
+              (click)="focusOnMap(issue)">
+              <mat-icon>map</mat-icon>
+              <span>Map</span>
+            </button>
           </div>
         </mat-card-content>
       </mat-card>
