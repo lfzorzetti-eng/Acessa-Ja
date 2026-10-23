@@ -21,6 +21,12 @@ export class IssueService {
     return this.http.post<Issue>(`${this.apiUrl}/issues`, request);
   }
 
+  deleteIssue(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/issues/${encodeURIComponent(id)}`)
+      .pipe(timeout({ first: 15000 }));
+  }
+
   imageUrl(issue: Issue): string {
     const baseUrl = this.apiUrl.startsWith('http')
       ? new URL(this.apiUrl).origin

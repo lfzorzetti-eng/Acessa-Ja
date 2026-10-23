@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { ObjectId } from 'mongodb';
 import { getDatabase, pingDatabase } from './db.js';
 import { AppError, sendError } from './errors.js';
 import { normalizeImage } from './images.js';
@@ -62,6 +63,14 @@ function validationError(detail) {
   return new AppError(400, 'Validation failed', detail);
 }
 
+function issueIdFilter(id) {
+  if (!ObjectId.isValid(id)) {
+    return { _id: id };
+  }
+
+  return { _id: { $in: [id, new ObjectId(id)] } };
+}
+
 export function registerRoutes(app) {
   app.get('/health', (_req, res) => {
     res.json({ status: 'healthy' });
@@ -100,7 +109,7 @@ export function registerRoutes(app) {
     try {
       const database = await getDatabase();
       const document = await database.collection('issues').findOne(
-        { _id: req.params.id },
+        issueIdFilter(req.params.id),
         {
           projection: {
             imageBase64: 1,
@@ -141,6 +150,27 @@ export function registerRoutes(app) {
       });
 
       return res.send(bytes);
+    } catch (error) {
+      return sendError(res, error);
+    }
+  });
+
+  app.delete('/api/issues/:id', async (req, res) => {
+    try {
+      const database = await getDatabase();
+      const result = await database
+        .collection('issues')
+        .deleteOne(issueIdFilter(req.params.id));
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({
+          title: 'Not found',
+          detail: 'The requested report does not exist.',
+          status: 404,
+        });
+      }
+
+      return res.status(204).send();
     } catch (error) {
       return sendError(res, error);
     }

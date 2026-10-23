@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Issue, IssueCategory, IssueNeed } from '../../core/models/issue.model';
 import { IssueService } from '../../core/services/issue.service';
@@ -41,6 +42,8 @@ export class DashboardComponent implements OnInit {
   hasError = false;
   selectedNeed: IssueNeed | null = null;
   selectedCategory: IssueCategory | null = null;
+  deletingIssueId: string | null = null;
+  deleteError: string | null = null;
   private pendingFocusId: string | null = null;
 
   get filteredIssues(): Issue[] {
@@ -138,6 +141,44 @@ export class DashboardComponent implements OnInit {
     this.radarMap?.focusIssue(issue);
   }
 
+  deleteIssue(issue: Issue): void {
+    const confirmed = window.confirm(
+      `Excluir o relato “${issue.classification}”? Esta ação não pode ser desfeita.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingIssueId = issue.id;
+    this.deleteError = null;
+
+    this.issueService.deleteIssue(issue.id).subscribe({
+      next: () => {
+        this.issues = this.issues.filter(currentIssue => currentIssue.id !== issue.id);
+        this.deletingIssueId = null;
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.deletingIssueId = null;
+        this.deleteError = this.deleteErrorMessage(error);
+        this.changeDetector.markForCheck();
+      }
+    });
+  }
+
+  private deleteErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 404) {
+      return 'A API em uso não encontrou este relato. Atualize a página e tente novamente.';
+    }
+
+    if (error.status === 0) {
+      return 'Não foi possível conectar à API para excluir o relato. Tente novamente em instantes.';
+    }
+
+    return error.error?.detail || 'Não foi possível excluir o relato. Tente novamente.';
+  }
+
   toggleNeed(need: IssueNeed): void {
     this.selectedNeed = this.selectedNeed === need ? null : need;
     this.changeDetector.markForCheck();
@@ -171,6 +212,7 @@ export class DashboardComponent implements OnInit {
   loadIssues(): void {
     this.isLoading = true;
     this.hasError = false;
+    this.deleteError = null;
 
     this.issueService.getIssues().subscribe({
       next: issues => {

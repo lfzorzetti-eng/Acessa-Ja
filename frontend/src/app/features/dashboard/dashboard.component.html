@@ -142,6 +142,11 @@
       <button mat-stroked-button type="button" (click)="loadIssues()">Tentar novamente</button>
     </section>
 
+    <section class="delete-error" *ngIf="deleteError" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ deleteError }}</span>
+    </section>
+
     <section class="empty-state" *ngIf="!isLoading && !hasError && issues.length === 0">
       <div class="empty-illustration" aria-hidden="true">
         <span class="empty-street"></span>
@@ -169,7 +174,7 @@
     </section>
 
     <div class="issue-grid" *ngIf="!isLoading && !hasError && filteredIssues.length > 0">
-      <mat-card class="issue-card" *ngFor="let issue of filteredIssues">
+      <mat-card class="issue-card" *ngFor="let issue of filteredIssues" [class.is-deleting]="deletingIssueId === issue.id">
         <div class="issue-image">
           <img [src]="imageUrl(issue)" [alt]="issue.classification">
           <span class="severity-badge" [ngClass]="'severity-' + issue.severity">
@@ -205,6 +210,15 @@
               (click)="focusOnMap(issue)">
               <mat-icon>map</mat-icon>
               <span>Mapa</span>
+            </button>
+            <button
+              type="button"
+              class="delete-report"
+              [attr.aria-label]="'Excluir relato: ' + issue.classification"
+              [disabled]="deletingIssueId !== null"
+              (click)="deleteIssue(issue)">
+              <mat-icon>{{ deletingIssueId === issue.id ? 'hourglass_top' : 'delete_outline' }}</mat-icon>
+              <span>{{ deletingIssueId === issue.id ? 'Excluindo' : 'Excluir' }}</span>
             </button>
           </div>
         </mat-card-content>

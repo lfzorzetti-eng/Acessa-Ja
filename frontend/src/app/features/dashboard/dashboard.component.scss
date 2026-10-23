@@ -394,6 +394,26 @@ h1 em {
   margin-left: auto;
 }
 
+.delete-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #edc7bb;
+  border-radius: 12px;
+  background: #fffaf8;
+  color: #a34026;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.delete-error mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
 .empty-state {
   display: grid;
   grid-template-columns: minmax(240px, 0.8fr) minmax(260px, 1fr);
@@ -512,6 +532,10 @@ h1 em {
   border-radius: 18px;
   background: var(--surface);
   box-shadow: none;
+}
+
+.issue-card.is-deleting {
+  opacity: 0.62;
 }
 
 .issue-image {
@@ -665,6 +689,36 @@ h1 em {
 }
 
 .map-focus mat-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+.delete-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a34026;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-report:hover:not(:disabled) {
+  color: var(--signal);
+}
+
+.delete-report:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.delete-report mat-icon {
   width: 14px;
   height: 14px;
   font-size: 14px;

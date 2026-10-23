@@ -192,6 +192,7 @@ Saída em `frontend/dist/urban-accessibility-radar/browser`.
 | `GET` | `/api/issues?limit=50` | Lista os relatórios mais recentes **sem as imagens** (padrão 50; valores são ajustados para a faixa 1–50) |
 | `GET` | `/api/issues/{id}/image` | Retorna a imagem com cache imutável |
 | `POST` | `/api/issues` | Analisa e salva um relatório |
+| `DELETE` | `/api/issues/{id}` | Exclui um relatório existente |
 | `GET` | `/health` | Liveness |
 | `GET` | `/health/ready` | Readiness (ping no MongoDB) |
 
