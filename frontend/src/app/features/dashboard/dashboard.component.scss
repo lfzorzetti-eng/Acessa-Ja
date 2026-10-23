@@ -32,7 +32,14 @@
   box-shadow: 0 0 0 4px #dbe9df;
 }
 
-.dashboard-page h1 {
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
   margin-bottom: 17px;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   font-size: clamp(38px, 5.3vw, 62px);
@@ -41,7 +48,7 @@
   line-height: 1.02;
 }
 
-.dashboard-page h1 em {
+h1 em {
   color: var(--signal);
   font-style: normal;
 }
@@ -57,6 +64,10 @@
 .heading-action {
   flex: 0 0 auto;
   margin-bottom: 5px;
+}
+
+.heading-action mat-icon {
+  margin-right: 6px;
 }
 
 .overview-grid {
@@ -99,10 +110,6 @@
   border-radius: 13px;
   background: var(--leaf-pale);
   color: var(--leaf);
-}
-
-.overview-icon .material-icons {
-  font-size: 22px;
 }
 
 .overview-high .overview-icon {
@@ -188,6 +195,10 @@
   font-size: 13px;
 }
 
+.loading-state mat-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--signal);
+}
+
 .error-state {
   display: flex;
   align-items: center;
@@ -199,9 +210,8 @@
   background: #fffaf8;
 }
 
-.error-state > .material-icons {
+.error-state > mat-icon {
   color: var(--signal);
-  font-size: 24px;
 }
 
 .error-state h3 {
@@ -271,7 +281,7 @@
   transform: translate(-50%, -50%);
 }
 
-.empty-pin .material-icons {
+.empty-pin mat-icon {
   width: 22px;
   height: 22px;
   font-size: 22px;
@@ -309,6 +319,10 @@
   color: var(--ink-soft);
   font-size: 13px;
   line-height: 1.65;
+}
+
+.empty-copy .accent-button mat-icon {
+  margin-right: 6px;
 }
 
 .issue-grid {
@@ -372,7 +386,7 @@
   background: var(--signal);
 }
 
-.issue-body {
+.issue-card mat-card-content {
   padding: 19px 20px 20px;
 }
 
@@ -419,7 +433,7 @@
   font-weight: 600;
 }
 
-.issue-location .material-icons {
+.issue-location mat-icon {
   width: 16px;
   height: 16px;
   font-size: 16px;

@@ -1,0 +1,45 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/" aria-label="Urban Accessibility Radar home">
+      <span class="brand-mark">
+        <mat-icon>pin_drop</mat-icon>
+      </span>
+      <span class="brand-copy">
+        <strong>Urban Accessibility</strong>
+        <span>Radar</span>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>explore</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a
+        mat-button
+        routerLink="/report"
+        routerLinkActive="active-link">
+        <mat-icon>add_location_alt</mat-icon>
+        <span>Report an issue</span>
+      </a>
+    </nav>
+
+    <a mat-flat-button class="accent-button topbar-action" routerLink="/report">
+      <mat-icon>add</mat-icon>
+      <span>New report</span>
+    </a>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="site-footer">
+    <span>Every clear path starts with a report.</span>
+    <span class="footer-mark"><mat-icon>location_on</mat-icon> Safer streets, block by block</span>
+  </footer>
+</div>

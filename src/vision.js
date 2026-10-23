@@ -2,7 +2,8 @@ import { getOpenAiApiKey, getOpenAiModel } from './config.js';
 import { AppError } from './errors.js';
 
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-const REQUEST_TIMEOUT_MS = 90_000;
+// Keep this below the Vercel function limit (60s) to leave room for Mongo and the response.
+const REQUEST_TIMEOUT_MS = 50_000;
 
 const SYSTEM_PROMPT =
   'You review street-level images for barriers to pedestrian and wheelchair accessibility. ' +

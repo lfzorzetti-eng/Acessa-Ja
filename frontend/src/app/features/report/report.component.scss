@@ -24,7 +24,7 @@
   color: var(--signal);
 }
 
-.back-link .material-icons {
+.back-link mat-icon {
   width: 17px;
   height: 17px;
   font-size: 17px;
@@ -91,7 +91,7 @@
   box-shadow: none;
 }
 
-.card-body {
+.form-card mat-card-content {
   padding: 24px;
 }
 
@@ -115,10 +115,6 @@
 .photo-step {
   background: var(--signal-pale);
   color: var(--signal);
-}
-
-.step-icon .material-icons {
-  font-size: 22px;
 }
 
 .step-label {
@@ -173,10 +169,6 @@
   color: var(--ink-soft);
 }
 
-.location-symbol .material-icons {
-  font-size: 20px;
-}
-
 .location-ready .location-symbol {
   background: #dfede3;
   color: var(--leaf);
@@ -204,17 +196,24 @@
 .location-button {
   min-height: 38px;
   flex: 0 0 auto;
-  padding: 0 16px;
   border-radius: 999px;
   color: var(--leaf);
   font-size: 11px;
   font-weight: 700;
 }
 
-.location-button .material-icons {
+.location-button mat-icon {
   width: 17px;
   height: 17px;
+  margin-right: 4px;
   font-size: 17px;
+}
+
+.location-button mat-spinner {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+  --mdc-circular-progress-active-indicator-color: var(--leaf);
 }
 
 .privacy-note {
@@ -226,10 +225,20 @@
   font-size: 10px;
 }
 
-.privacy-note .material-icons {
+.privacy-note mat-icon {
   width: 14px;
   height: 14px;
   font-size: 14px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
 }
 
 .upload-zone {
@@ -276,7 +285,7 @@
   color: var(--leaf);
 }
 
-.upload-icon .material-icons {
+.upload-icon mat-icon {
   width: 22px;
   height: 22px;
   font-size: 22px;
@@ -303,7 +312,6 @@
   position: relative;
   z-index: 1;
   min-height: 38px;
-  padding: 0 16px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.93);
   color: var(--ink);
@@ -311,9 +319,10 @@
   font-weight: 700;
 }
 
-.choose-image-button .material-icons {
+.choose-image-button mat-icon {
   width: 17px;
   height: 17px;
+  margin-right: 4px;
   font-size: 17px;
 }
 
@@ -326,7 +335,7 @@
   font-size: 11px;
 }
 
-.selected-file > .material-icons:first-child {
+.selected-file > mat-icon:first-child {
   width: 17px;
   height: 17px;
   color: var(--leaf);
@@ -361,15 +370,23 @@
 }
 
 .submit-button {
-  min-height: 52px;
+  min-height: 52px !important;
   justify-self: start;
-  padding: 0 25px;
+  padding: 0 25px !important;
 }
 
-.submit-button .material-icons {
+.submit-button mat-icon {
   width: 19px;
   height: 19px;
+  margin-right: 8px;
   font-size: 19px;
+}
+
+.submit-button mat-spinner {
+  display: inline-block;
+  margin-right: 9px;
+  vertical-align: middle;
+  --mdc-circular-progress-active-indicator-color: #fff;
 }
 
 .submit-hint {
@@ -472,7 +489,7 @@
   box-shadow: 0 6px 15px rgba(52, 62, 43, 0.2);
 }
 
-.map-pin .material-icons {
+.map-pin mat-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
@@ -522,7 +539,7 @@
   line-height: 1.55;
 }
 
-.aside-promise .material-icons {
+.aside-promise mat-icon {
   width: 16px;
   height: 16px;
   flex: 0 0 auto;
@@ -536,7 +553,7 @@
     gap: 18px;
   }
 
-  .card-body {
+  .form-card mat-card-content {
     padding: 20px;
   }
 

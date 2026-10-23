@@ -6,6 +6,10 @@ node_modules/
 .vercel/
 .DS_Store
 *.log
+*.tsbuildinfo
+
+frontend/.angular/
+frontend/dist/
 
 .idea/
 .vs/

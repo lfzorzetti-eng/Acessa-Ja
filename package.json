@@ -9,7 +9,9 @@
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env dev-server.js",
-    "start": "node --env-file-if-exists=.env dev-server.js"
+    "start": "node --env-file-if-exists=.env dev-server.js",
+    "dev:web": "npm --prefix frontend start",
+    "build:web": "npm --prefix frontend run build"
   },
   "dependencies": {
     "express": "^5.1.0",

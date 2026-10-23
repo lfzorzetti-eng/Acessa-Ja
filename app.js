@@ -7,9 +7,6 @@ const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '4.2mb' }));
 
-// Funciona no desenvolvimento local. No Vercel, `public/` é servido pelo CDN.
-app.use(express.static('public', { extensions: ['html'] }));
-
 registerRoutes(app);
 
 app.use('/api', (_req, res) => {

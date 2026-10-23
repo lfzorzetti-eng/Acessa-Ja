@@ -2,24 +2,23 @@
 
 Aplicação full-stack para reportar barreiras de acessibilidade urbana. O usuário envia uma foto e a localização; a API analisa a imagem com a **OpenAI** (visão), classifica o problema, atribui uma severidade e salva o relatório no **MongoDB Atlas**.
 
-- **Frontend:** HTML + CSS + JavaScript (ES Modules), sem build
+- **Frontend:** Angular 21 + Angular Material
 - **Backend:** Node.js 20.19+ + Express 5
 - **Banco:** MongoDB Atlas (`mongodb`)
 - **IA:** OpenAI `gpt-4o-mini` via `fetch`
-- **Deploy:** Vercel (Express zero-config + `public/` no CDN)
+- **Deploy:** Vercel com Services (Angular estático + API Express)
 
 ---
 
 ## Arquitetura
 
-```
+```text
 Navegador
    │
-   ├── GET /                   → public/index.html        (CDN Vercel)
-   ├── GET /report.html        → public/report.html       (CDN Vercel)
-   ├── GET /css/*, /js/*       → public/*                 (CDN Vercel)
+   ├── GET /                   → Angular (frontend/)
+   ├── GET /report             → Angular (SPA)
    │
-   └── /api/*                  → Express (uma Vercel Function)
+   └── /api/*                  → Express (app.js)
          ├── GET  /api/issues?limit=50
          ├── GET  /api/issues/:id/image
          ├── POST /api/issues
@@ -29,55 +28,58 @@ Navegador
 
 No Vercel:
 
-- `app.js` (com `export default app`) é detectado automaticamente e vira **uma única Vercel Function**.
-- `public/**` é servido pelo CDN. O `express.static()` é ignorado em produção, mas funciona no desenvolvimento local.
-- `vercel.json` é opcional e existe apenas para headers de segurança.
+- O serviço `web` builda o Angular em `frontend/` e serve o resultado pelo CDN.
+- O serviço `api` roda o Express da raiz como uma Vercel Function.
+- `/api/*`, `/health` e `/health/ready` são roteados para a API; o restante vai para o Angular, com fallback de SPA.
 
 ---
 
 ## Estrutura do projeto
 
-```
+```text
 .
 ├── app.js                      # cria e exporta o app Express
-├── dev-server.js               # servidor local
-├── package.json
-├── vercel.json                 # headers de segurança (opcional)
+├── dev-server.js               # servidor local da API
+├── package.json                # backend + scripts
+├── vercel.json                 # Services e rewrites
 ├── .env.example
 ├── .gitignore
 ├── README.md
 │
 ├── src/
-│   ├── config.js               # leitura das variáveis de ambiente
+│   ├── config.js               # variáveis de ambiente
 │   ├── db.js                   # MongoClient cacheado + índice
-│   ├── images.js               # validação/normalização da imagem
+│   ├── images.js               # validação da imagem
 │   ├── vision.js               # chamada à OpenAI
 │   ├── errors.js               # erros de domínio → status HTTP
-│   └── routes.js               # /api/issues, /api/issues/:id/image, /health
+│   └── routes.js               # rotas da API
 │
-└── public/
-    ├── index.html              # dashboard
-    ├── report.html             # formulário de report
-    ├── favicon.svg
-    ├── css/
-    │   ├── base.css            # tokens, reset, topbar, botões, toast
-    │   ├── dashboard.css       # cards, estatísticas, estados
-    │   └── report.css          # formulário, localização, upload, aside
-    └── js/
-        ├── api.js              # fetch de /api
-        ├── compress-image.js   # canvas: resize + JPEG
-        ├── dashboard.js        # render da lista/estatísticas
-        ├── report.js           # geolocalização, upload, submit
-        └── ui.js               # toast, datas, helpers
+└── frontend/                   # Angular 21 + Material
+    ├── angular.json
+    ├── proxy.conf.json         # /api → localhost:5080
+    ├── package.json
+    └── src/
+        ├── app/
+        │   ├── core/
+        │   │   ├── models/issue.model.ts
+        │   │   ├── services/issue.service.ts
+        │   │   └── utils/image-compression.ts
+        │   └── features/
+        │       ├── dashboard/
+        │       └── report/
+        ├── environments/environment.ts
+        ├── index.html
+        ├── main.ts
+        └── styles.scss
 ```
 
 ---
 
 ## Requisitos
 
-- Node.js **20.19+** (recomendado 22 ou 24)
-- Uma conta no MongoDB Atlas (ou MongoDB local)
-- Uma API key da OpenAI com acesso ao modelo de visão
+- Node.js **20.19+** ou **22.12+** ou **24+**
+- Conta no MongoDB Atlas (ou MongoDB local)
+- API key da OpenAI com acesso ao modelo de visão
 
 ---
 
@@ -104,18 +106,32 @@ PORT=5080
 > A porta local é **5080** porque a 5000 costuma estar ocupada pelo AirPlay no macOS.
 > `PORT` é usado apenas localmente; não defina essa variável no Vercel.
 
-### 2. Instalar e rodar
+### 2. Instalar dependências
 
 ```bash
 npm install
+npm --prefix frontend ci
+```
+
+### 3. Rodar em dois terminais
+
+Terminal 1 — API:
+
+```bash
 npm run dev
 ```
 
-A API e o site sobem em `http://localhost:5080`.
+API em `http://localhost:5080`.
 
-O script `dev` usa `node --env-file-if-exists=.env`; se o `.env` não existir, o servidor sobe mesmo assim e responde `503` nas rotas que dependem de banco/IA.
+Terminal 2 — Angular:
 
-### 3. Verificar
+```bash
+npm run dev:web
+```
+
+Angular em `http://localhost:4200`. O `proxy.conf.json` encaminha `/api` para `http://localhost:5080`, então não há CORS no dia a dia.
+
+### 4. Verificar a API
 
 ```bash
 curl http://localhost:5080/health
@@ -123,14 +139,22 @@ curl http://localhost:5080/health/ready
 curl http://localhost:5080/api/issues
 ```
 
+### 5. Build do Angular
+
+```bash
+npm run build:web
+```
+
+Saída em `frontend/dist/urban-accessibility-radar/browser`.
+
 ---
 
 ## API
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/api/issues?limit=50` | Lista os relatórios mais recentes **sem as imagens** (limite de 1 a 50) |
-| `GET` | `/api/issues/{id}/image` | Retorna a imagem do relatório com cache imutável |
+| `GET` | `/api/issues?limit=50` | Lista os relatórios mais recentes **sem as imagens** (padrão 50; valores são ajustados para a faixa 1–50) |
+| `GET` | `/api/issues/{id}/image` | Retorna a imagem com cache imutável |
 | `POST` | `/api/issues` | Analisa e salva um relatório |
 | `GET` | `/health` | Liveness |
 | `GET` | `/health/ready` | Readiness (ping no MongoDB) |
@@ -161,9 +185,9 @@ Resposta `201`:
 
 ### Imagens
 
-- O navegador redimensiona para no máximo **1600 px**, converte para JPEG (qualidade inicial `0.82`) e tenta ficar em até **2,5 MB**.
+- O Angular redimensiona para no máximo **1600 px**, converte para JPEG (qualidade inicial `0.82`) e tenta ficar em até **2,5 MB**.
 - O servidor aceita JPEG, PNG, WEBP ou GIF de até **3 MB** decodificados.
-- A imagem é guardada como base64 no MongoDB e servida por um endpoint separado, para a listagem não carregar imagens.
+- A imagem é guardada como base64 no MongoDB e servida por endpoint separado, para a listagem não carregar imagens.
 
 ### Status de erro
 
@@ -197,17 +221,16 @@ Collection `issues`:
 }
 ```
 
-- Índice: `{ createdAt: -1 }`, criado sob demanda.
-- A leitura também aceita documentos antigos em PascalCase (`Classification`, `ImageBase64`, etc.), caso existam.
+- Índice `{ createdAt: -1 }`, criado sob demanda.
+- A leitura também aceita documentos antigos em PascalCase (`Classification`, `ImageBase64`, etc.).
 
 ---
 
 ## Deploy no Vercel
 
 1. Suba o repositório no GitHub.
-2. Importe no Vercel com **Root Directory = raiz**.
-3. Deixe o framework em **Express** (ou automático — o Vercel detecta o `app.js`).
-4. Cadastre as variáveis em **Settings → Environment Variables** (Production e Preview):
+2. Importe no Vercel com **Root Directory = raiz**. O projeto precisa ser buildado no modo **Services** (beta); se o dashboard não detectar automaticamente, selecione **Framework = Services**.
+3. Cadastre as variáveis em **Settings → Environment Variables** (Production e Preview):
 
 ```env
 MONGODB_URI=...
@@ -218,8 +241,37 @@ OPENAI_MODEL=gpt-4o-mini
 
 > Não cadastre `PORT` no Vercel.
 
-5. Faça o deploy.
-6. Teste:
+4. Faça o deploy. O `vercel.json` define dois Services:
+
+```json
+{
+  "services": {
+    "web": {
+      "root": "frontend/",
+      "framework": "angular",
+      "installCommand": "npm ci",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist/urban-accessibility-radar/browser",
+      "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+    },
+    "api": {
+      "root": ".",
+      "framework": "express",
+      "functions": {
+        "app.js": { "maxDuration": 60 }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/health", "destination": { "service": "api" } },
+    { "source": "/health/ready", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
+}
+```
+
+5. Teste:
 
 ```bash
 curl https://SEU-PROJETO.vercel.app/health
@@ -227,25 +279,18 @@ curl https://SEU-PROJETO.vercel.app/health/ready
 curl https://SEU-PROJETO.vercel.app/api/issues
 ```
 
+### Timeout da análise
+
+A função da API está configurada com `maxDuration: 60` segundos. O timeout interno da OpenAI em `src/vision.js` é de **50 segundos**, deixando margem para MongoDB e resposta.
+
 ### MongoDB Atlas
 
 - Em **Network Access**, libere `0.0.0.0/0` (funções do Vercel não têm IP fixo) ou restrinja aos IPs do provedor.
 - Confirme que o usuário do banco tem permissão `readWrite` em `urban_accessibility_radar`.
 
-### Se o Vercel não detectar o Express
+### Se os Services não estiverem disponíveis na sua conta
 
-Fallback:
-
-```js
-// api/index.js
-export { default } from '../app.js';
-```
-
-```json
-{
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }]
-}
-```
+Fallback: use um único projeto com o build do Angular como output e funções serverless em `api/`. A configuração atual é a recomendada e mantém frontend e backend separados.
 
 ---
 
@@ -260,7 +305,11 @@ export { default } from '../app.js';
 ## Comandos úteis
 
 ```bash
-npm install       # instalar dependências
-npm run dev       # servidor local em http://localhost:5080
-npm start         # iniciar o servidor local (lê .env se existir)
+npm install             # dependências da API
+npm --prefix frontend ci # dependências do Angular (lockfile)
+npm run dev             # API em http://localhost:5080
+npm run dev:web         # Angular em http://localhost:4200
+npm run build:web       # build de produção do Angular
 ```
+
+> O frontend vanilla anterior foi preservado no histórico do Git na branch `node-vanilla`; a versão atual usa Angular.
