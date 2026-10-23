@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.DS_Store
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+.vercel/

@@ -1,0 +1,113 @@
+<section class="dashboard-page">
+  <header class="page-heading">
+    <div class="heading-copy">
+      <p class="eyebrow"><span class="live-dot"></span> Community street watch</p>
+      <h1>Make every route<br><em>easier to take.</em></h1>
+      <p class="heading-description">
+        Find the barriers people encounter on foot, then help make them visible.
+      </p>
+    </div>
+    <a mat-flat-button class="accent-button heading-action" routerLink="/report">
+      <mat-icon>photo_camera</mat-icon>
+      Report a barrier
+    </a>
+  </header>
+
+  <section class="overview-grid" aria-label="Issue summary">
+    <article class="overview-card overview-total">
+      <div class="overview-icon"><mat-icon>location_on</mat-icon></div>
+      <div>
+        <span class="overview-label">Reports on the radar</span>
+        <strong>{{ issues.length }}</strong>
+      </div>
+      <span class="overview-note">community reports</span>
+    </article>
+
+    <article class="overview-card overview-high">
+      <div class="overview-icon"><mat-icon>priority_high</mat-icon></div>
+      <div>
+        <span class="overview-label">Needs attention</span>
+        <strong>{{ highSeverityCount }}</strong>
+      </div>
+      <span class="overview-note">high severity</span>
+    </article>
+
+    <article class="overview-card overview-latest">
+      <div class="overview-icon"><mat-icon>schedule</mat-icon></div>
+      <div>
+        <span class="overview-label">Latest activity</span>
+        <strong>{{ latestReportDate ? (latestReportDate | date: 'MMM d') : '—' }}</strong>
+      </div>
+      <span class="overview-note">most recent report</span>
+    </article>
+  </section>
+
+  <section class="activity-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Field notes</p>
+        <h2>Recent reports</h2>
+      </div>
+      <div class="report-count">
+        <span class="count-line"></span>
+        <span>{{ issues.length }} {{ issues.length === 1 ? 'report' : 'reports' }}</span>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading" role="status">
+      <mat-spinner diameter="38"></mat-spinner>
+      <span>Reading the latest street reports…</span>
+    </div>
+
+    <section class="error-state" *ngIf="hasError" role="alert">
+      <mat-icon>cloud_off</mat-icon>
+      <div>
+        <h3>The radar could not load reports</h3>
+        <p>Check that the API and database are running, then try again.</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="loadIssues()">Try again</button>
+    </section>
+
+    <section class="empty-state" *ngIf="!isLoading && !hasError && issues.length === 0">
+      <div class="empty-illustration" aria-hidden="true">
+        <span class="empty-street"></span>
+        <span class="empty-pin"><mat-icon>add_location_alt</mat-icon></span>
+        <span class="empty-sun"></span>
+      </div>
+      <div class="empty-copy">
+        <p class="eyebrow">A clear map is a good start</p>
+        <h3>No reports yet</h3>
+        <p>Share a photo of a blocked ramp, broken sidewalk, or another barrier on your route.</p>
+        <a mat-flat-button class="accent-button" routerLink="/report">
+          <mat-icon>add_a_photo</mat-icon>
+          Add the first report
+        </a>
+      </div>
+    </section>
+
+    <div class="issue-grid" *ngIf="!isLoading && !hasError && issues.length > 0">
+      <mat-card class="issue-card" *ngFor="let issue of issues">
+        <div class="issue-image">
+          <img [src]="imageUrl(issue)" [alt]="issue.classification">
+          <span class="severity-badge" [ngClass]="'severity-' + issue.severity">
+            <span class="severity-dot"></span>
+            {{ issue.severity }}
+          </span>
+        </div>
+        <mat-card-content>
+          <div class="issue-meta">
+            <span>{{ issue.createdAt | date: 'MMM d, y · h:mm a' }}</span>
+            <span class="meta-divider"></span>
+            <span>AI reviewed</span>
+          </div>
+          <h3>{{ issue.classification }}</h3>
+          <p class="issue-description">{{ issue.description }}</p>
+          <div class="issue-location">
+            <mat-icon>near_me</mat-icon>
+            <span>{{ issue.latitude | number: '1.4-4' }}, {{ issue.longitude | number: '1.4-4' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+</section>
