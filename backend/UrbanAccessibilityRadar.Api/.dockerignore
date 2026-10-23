@@ -1,8 +1,0 @@
-.env
-.env.*
-bin/
-obj/
-.vs/
-*.user
-*.suo
-Dockerfile.vercel

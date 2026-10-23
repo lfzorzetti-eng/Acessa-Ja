@@ -2,11 +2,11 @@
 
 Aplicação full-stack para reportar barreiras de acessibilidade urbana. O usuário envia uma foto e a localização; a API analisa a imagem com a **OpenAI** (visão), classifica o problema, atribui uma severidade e salva o relatório no **MongoDB Atlas**.
 
-- **Frontend:** Angular 21 + Angular Material
-- **Backend:** ASP.NET Core 10 (minimal API)
-- **Banco:** MongoDB Atlas (`MongoDB.Driver`)
-- **IA:** OpenAI `gpt-4o-mini` (configurável)
-- **Deploy:** Vercel (Angular estático + API .NET em container, no mesmo domínio)
+- **Frontend:** HTML + CSS + JavaScript (ES Modules), sem build
+- **Backend:** Node.js 20.19+ + Express 5
+- **Banco:** MongoDB Atlas (`mongodb`)
+- **IA:** OpenAI `gpt-4o-mini` via `fetch`
+- **Deploy:** Vercel (Express zero-config + `public/` no CDN)
 
 ---
 
@@ -15,22 +15,23 @@ Aplicação full-stack para reportar barreiras de acessibilidade urbana. O usuá
 ```
 Navegador
    │
-   ├── GET  /                → Angular (estático no Vercel)
-   ├── GET  /api/issues      → API .NET  ──→ MongoDB Atlas
-   ├── GET  /api/issues/:id/image
-   └── POST /api/issues      → API .NET  ──→ OpenAI (visão)
-                                 │
-                                 └── classificação, severidade e descrição
+   ├── GET /                   → public/index.html        (CDN Vercel)
+   ├── GET /report.html        → public/report.html       (CDN Vercel)
+   ├── GET /css/*, /js/*       → public/*                 (CDN Vercel)
+   │
+   └── /api/*                  → Express (uma Vercel Function)
+         ├── GET  /api/issues?limit=50
+         ├── GET  /api/issues/:id/image
+         ├── POST /api/issues
+         ├── GET  /health
+         └── GET  /health/ready
 ```
 
-No deploy, `vercel.json` define **dois services**:
+No Vercel:
 
-| Service | Tipo | Caminho |
-|---|---|---|
-| `web` | Angular estático | `frontend/` |
-| `api` | Container .NET 10 | `backend/UrbanAccessibilityRadar.Api/` |
-
-As rewrites mandam `/api/*` para a API e todo o resto para o Angular. Como tudo fica no **mesmo domínio**, não é necessário configurar CORS em produção.
+- `app.js` (com `export default app`) é detectado automaticamente e vira **uma única Vercel Function**.
+- `public/**` é servido pelo CDN. O `express.static()` é ignorado em produção, mas funciona no desenvolvimento local.
+- `vercel.json` é opcional e existe apenas para headers de segurança.
 
 ---
 
@@ -38,38 +39,43 @@ As rewrites mandam `/api/*` para a API e todo o resto para o Angular. Como tudo 
 
 ```
 .
-├── vercel.json                        # services web + api e rewrites
-├── backend/
-│   ├── .env                           # variáveis locais (NÃO versionar)
-│   ├── .env.example                   # modelo de variáveis
-│   └── UrbanAccessibilityRadar.Api/
-│       ├── Dockerfile.vercel          # imagem usada pelo Vercel
-│       ├── Program.cs                 # endpoints, Mongo, CORS, PORT
-│       ├── appsettings.json           # defaults sem segredos
-│       ├── Contracts/                 # CreateIssueRequest, VisionAnalysis, IssueSummary
-│       ├── Data/IssueRepository.cs    # acesso ao MongoDB
-│       ├── Models/Issue.cs
-│       └── Services/
-│           ├── VisionAnalysisService.cs
-│           └── ImagePayload.cs
-└── frontend/
-    ├── proxy.conf.json                # dev: /api → localhost:5080
-    └── src/app/
-        ├── core/
-        │   ├── models/issue.model.ts
-        │   ├── services/issue.service.ts
-        │   └── utils/image-compression.ts
-        └── features/
-            ├── dashboard/
-            └── report/
+├── app.js                      # cria e exporta o app Express
+├── dev-server.js               # servidor local
+├── package.json
+├── vercel.json                 # headers de segurança (opcional)
+├── .env.example
+├── .gitignore
+├── README.md
+│
+├── src/
+│   ├── config.js               # leitura das variáveis de ambiente
+│   ├── db.js                   # MongoClient cacheado + índice
+│   ├── images.js               # validação/normalização da imagem
+│   ├── vision.js               # chamada à OpenAI
+│   ├── errors.js               # erros de domínio → status HTTP
+│   └── routes.js               # /api/issues, /api/issues/:id/image, /health
+│
+└── public/
+    ├── index.html              # dashboard
+    ├── report.html             # formulário de report
+    ├── favicon.svg
+    ├── css/
+    │   ├── base.css            # tokens, reset, topbar, botões, toast
+    │   ├── dashboard.css       # cards, estatísticas, estados
+    │   └── report.css          # formulário, localização, upload, aside
+    └── js/
+        ├── api.js              # fetch de /api
+        ├── compress-image.js   # canvas: resize + JPEG
+        ├── dashboard.js        # render da lista/estatísticas
+        ├── report.js           # geolocalização, upload, submit
+        └── ui.js               # toast, datas, helpers
 ```
 
 ---
 
 ## Requisitos
 
-- .NET 10 SDK
-- Node.js 20.19+ (recomendado 22 ou 24)
+- Node.js **20.19+** (recomendado 22 ou 24)
 - Uma conta no MongoDB Atlas (ou MongoDB local)
 - Uma API key da OpenAI com acesso ao modelo de visão
 
@@ -79,45 +85,43 @@ As rewrites mandam `/api/*` para a API e todo o resto para o Angular. Como tudo 
 
 ### 1. Variáveis de ambiente
 
-Copie `backend/.env.example` para `backend/.env` e preencha:
+```bash
+cp .env.example .env
+```
+
+Preencha:
 
 ```env
-ASPNETCORE_ENVIRONMENT=Development
-ASPNETCORE_URLS=http://localhost:5080
+MONGODB_URI=mongodb+srv://USUARIO:SENHA@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=urban_accessibility_radar
 
-MongoDB__ConnectionString=mongodb+srv://USUARIO:SENHA@cluster.mongodb.net/?retryWrites=true&w=majority
-MongoDB__Database=urban_accessibility_radar
-
-AI__Provider=OpenAI
 OPENAI_API_KEY=sk-...
-AI__OpenAI__Model=gpt-4o-mini
+OPENAI_MODEL=gpt-4o-mini
+
+PORT=5080
 ```
 
-> `backend/.env` é carregado automaticamente pela API e está no `.gitignore`.
-> A porta local é **5080** (a 5000 costuma estar ocupada pelo AirPlay no macOS).
+> A porta local é **5080** porque a 5000 costuma estar ocupada pelo AirPlay no macOS.
+> `PORT` é usado apenas localmente; não defina essa variável no Vercel.
 
-### 2. Rodar a API
+### 2. Instalar e rodar
 
 ```bash
-dotnet run --project backend/UrbanAccessibilityRadar.Api/UrbanAccessibilityRadar.Api.csproj --launch-profile http
+npm install
+npm run dev
 ```
 
-A API sobe em `http://localhost:5080`. Os endpoints de saúde são:
+A API e o site sobem em `http://localhost:5080`.
+
+O script `dev` usa `node --env-file-if-exists=.env`; se o `.env` não existir, o servidor sobe mesmo assim e responde `503` nas rotas que dependem de banco/IA.
+
+### 3. Verificar
 
 ```bash
 curl http://localhost:5080/health
-curl http://localhost:5080/health/ready   # testa o MongoDB
+curl http://localhost:5080/health/ready
+curl http://localhost:5080/api/issues
 ```
-
-### 3. Rodar o Angular
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Abra `http://localhost:4200`. O dev server usa `proxy.conf.json` para encaminhar `/api` para `http://localhost:5080`, então não há CORS no dia a dia.
 
 ---
 
@@ -125,13 +129,13 @@ Abra `http://localhost:4200`. O dev server usa `proxy.conf.json` para encaminhar
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/api/issues?limit=50` | Lista os relatórios mais recentes **sem as imagens** (limite máximo de 50) |
-| `GET` | `/api/issues/{id}/image` | Retorna a imagem do relatório com cache |
+| `GET` | `/api/issues?limit=50` | Lista os relatórios mais recentes **sem as imagens** (limite de 1 a 50) |
+| `GET` | `/api/issues/{id}/image` | Retorna a imagem do relatório com cache imutável |
 | `POST` | `/api/issues` | Analisa e salva um relatório |
 | `GET` | `/health` | Liveness |
 | `GET` | `/health/ready` | Readiness (ping no MongoDB) |
 
-Exemplo de POST:
+Exemplo de `POST /api/issues`:
 
 ```json
 {
@@ -141,56 +145,81 @@ Exemplo de POST:
 }
 ```
 
-A imagem é validada no servidor (JPEG, PNG, WEBP ou GIF, até **3 MB**). No navegador, a imagem é redimensionada e recomprimida automaticamente antes do envio.
+Resposta `201`:
+
+```json
+{
+  "id": "uuid",
+  "classification": "Broken sidewalk",
+  "severity": "high",
+  "description": "...",
+  "latitude": -23.5505,
+  "longitude": -46.6333,
+  "createdAt": "2026-10-23T16:00:00.000Z"
+}
+```
+
+### Imagens
+
+- O navegador redimensiona para no máximo **1600 px**, converte para JPEG (qualidade inicial `0.82`) e tenta ficar em até **2,5 MB**.
+- O servidor aceita JPEG, PNG, WEBP ou GIF de até **3 MB** decodificados.
+- A imagem é guardada como base64 no MongoDB e servida por um endpoint separado, para a listagem não carregar imagens.
+
+### Status de erro
+
+| Situação | Status |
+|---|---|
+| Falta `OPENAI_API_KEY` | `503` |
+| OpenAI retorna 4xx/5xx | `502` |
+| Timeout/abort da OpenAI | `504` |
+| JSON inválido da OpenAI | `502` |
+| Mongo indisponível | `503` |
+| Validação de entrada | `400` |
+| Body grande demais | `413` |
+
+---
+
+## Modelo no MongoDB
+
+Collection `issues`:
+
+```js
+{
+  _id: "uuid",
+  classification: "Broken sidewalk",
+  severity: "high",
+  description: "Texto...",
+  latitude: -23.5,
+  longitude: -46.6,
+  imageBase64: "...",
+  imageContentType: "image/jpeg",
+  createdAt: ISODate("2026-10-23T16:00:00Z")
+}
+```
+
+- Índice: `{ createdAt: -1 }`, criado sob demanda.
+- A leitura também aceita documentos antigos em PascalCase (`Classification`, `ImageBase64`, etc.), caso existam.
 
 ---
 
 ## Deploy no Vercel
 
-### 1. Repositório
-
-O Vercel faz deploy a partir do GitHub:
-
-```bash
-git init
-git add .
-git commit -m "Urban Accessibility Radar"
-git remote add origin https://github.com/SEU-USUARIO/SEU-REPO.git
-git push -u origin main
-```
-
-Confirme que `backend/.env` **não** foi commitado.
-
-### 2. Importar no Vercel
-
-1. **Add New Project** → importe o repositório.
-2. **Root Directory:** a raiz do repositório (onde está o `vercel.json`).
-3. Framework preset: deixe em branco (o `vercel.json` define os services).
-4. Cadastre as variáveis de ambiente em **Settings → Environment Variables** (Production e Preview):
+1. Suba o repositório no GitHub.
+2. Importe no Vercel com **Root Directory = raiz**.
+3. Deixe o framework em **Express** (ou automático — o Vercel detecta o `app.js`).
+4. Cadastre as variáveis em **Settings → Environment Variables** (Production e Preview):
 
 ```env
-MongoDB__ConnectionString=mongodb+srv://USUARIO:SENHA@cluster.mongodb.net/?retryWrites=true&w=majority
-MongoDB__Database=urban_accessibility_radar
-
-AI__Provider=OpenAI
+MONGODB_URI=...
+MONGODB_DB=urban_accessibility_radar
 OPENAI_API_KEY=sk-...
-AI__OpenAI__Model=gpt-4o-mini
-
-ASPNETCORE_ENVIRONMENT=Production
-PORT=8080
+OPENAI_MODEL=gpt-4o-mini
 ```
 
-> **`PORT=8080` é obrigatório.** O container .NET escuta em 8080, e o Vercel roteia para a porta definida em `PORT` (o padrão dele é 80, que é privilegiada).
+> Não cadastre `PORT` no Vercel.
 
-5. Clique em **Deploy**.
-
-### 3. MongoDB Atlas
-
-- Em **Network Access**, libere `0.0.0.0/0` (containers do Vercel não têm IP fixo) ou restrinja aos IPs do seu provedor.
-- Confirme que o usuário do banco tem permissão `readWrite` em `urban_accessibility_radar`.
-- A API cria o índice de `createdAt` na inicialização; se o Atlas estiver fora no momento do deploy, ela sobe mesmo assim e o índice é criado no próximo start.
-
-### 4. Verificação pós-deploy
+5. Faça o deploy.
+6. Teste:
 
 ```bash
 curl https://SEU-PROJETO.vercel.app/health
@@ -198,52 +227,40 @@ curl https://SEU-PROJETO.vercel.app/health/ready
 curl https://SEU-PROJETO.vercel.app/api/issues
 ```
 
-Depois abra o site, permita a localização (HTTPS é obrigatório para geolocalização) e envie uma foto.
+### MongoDB Atlas
 
----
+- Em **Network Access**, libere `0.0.0.0/0` (funções do Vercel não têm IP fixo) ou restrinja aos IPs do provedor.
+- Confirme que o usuário do banco tem permissão `readWrite` em `urban_accessibility_radar`.
 
-## Fallback: API fora do Vercel
+### Se o Vercel não detectar o Express
 
-Os services com container no Vercel ainda estão em **beta**. Se o build do container falhar:
+Fallback:
 
-1. Faça deploy da API em um host com Docker (Render, Railway, Fly.io, VPS).
-2. No Vercel, mantenha apenas o service `web` e remova o `api` do `vercel.json`.
-3. Crie um rewrite no projeto do frontend de `/api/(.*)` para a URL da API.
-4. Se preferir chamar a API direto, defina `apiUrl` em `frontend/src/environments/environment.ts` com a URL completa e configure `Cors__AllowedOrigins` na API.
+```js
+// api/index.js
+export { default } from '../app.js';
+```
 
----
-
-## Limites e decisões de produção
-
-| Limite | Valor | Por quê |
-|---|---|---|
-| Corpo da requisição no Vercel | **4,5 MB** | Limite da plataforma. A imagem é comprimida no navegador para ~2,5 MB |
-| Imagem aceita pela API | **3 MB** | Validação no servidor (`ImagePayload`) |
-| Lista de relatórios | **50** | `GET /api/issues` retorna metadados, não imagens |
-| Documento no MongoDB | 16 MB | Imagens comprimidas ficam muito abaixo disso |
-
-- **Imagens:** o navegador redimensiona para no máximo 1600 px e converte para JPEG (~82% de qualidade).
-- **Listagem:** o dashboard carrega apenas os metadados; cada imagem é baixada sob demanda em `/api/issues/{id}/image`.
-- **Cold start:** o primeiro request após um período ocioso pode levar alguns segundos (container .NET + Mongo + OpenAI).
-
----
-
-## Solução de problemas
-
-| Sintoma | Causa provável | Solução |
-|---|---|---|
-| `403 Forbidden` em `localhost:5000` | AirPlay usa a porta 5000 no macOS | Use a porta 5080 (já configurada) |
-| `503 Image analysis is not configured` | `OPENAI_API_KEY` ausente | Configure a chave e reinicie a API |
-| `413 FUNCTION_PAYLOAD_TOO_LARGE` | Imagem grande demais | A compressão no frontend deve manter o payload abaixo de 4,5 MB |
-| `502` no envio | Falha/timeout na OpenAI | Verifique a chave, o modelo e os logs do Vercel |
-| `503` no dashboard | MongoDB inacessível | Verifique a connection string e o Network Access do Atlas |
-| Container 502 no Vercel | API não está escutando na porta certa | Confirme `PORT=8080` nas variáveis do projeto |
+```json
+{
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }]
+}
+```
 
 ---
 
 ## Segurança
 
-- Nunca commite `backend/.env`. Use as variáveis de ambiente do Vercel.
-- A senha do MongoDB e a chave da OpenAI devem ser **rotacionadas** se tiverem sido expostas.
-- A chave da OpenAI fica somente no backend; o navegador nunca a recebe.
-- O checklist de deploy inclui: `.env` ignorado, Atlas com usuário de menor privilégio e `0.0.0.0/0` apenas se necessário.
+- Não versione o `.env`.
+- A senha do MongoDB Atlas está no `.env` local. **Rotacione antes do deploy** e nunca versione esse arquivo.
+- O produto não tem autenticação nem rate limit. Para uso público, adicione rate limit por IP (ou Vercel WAF) para proteger a cota da OpenAI.
+
+---
+
+## Comandos úteis
+
+```bash
+npm install       # instalar dependências
+npm run dev       # servidor local em http://localhost:5080
+npm start         # iniciar o servidor local (lê .env se existir)
+```

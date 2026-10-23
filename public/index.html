@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f5f0">
+    <meta
+      name="description"
+      content="Community street watch for urban accessibility barriers: see recent reports and help make every route easier to take.">
+    <title>Dashboard | Urban Accessibility Radar</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap"
+      rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Urban Accessibility Radar home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="material-icons">pin_drop</span>
+          </span>
+          <span class="brand-copy">
+            <strong>Urban Accessibility</strong>
+            <span>Radar</span>
+          </span>
+        </a>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="/" class="active-link" aria-current="page">
+            <span class="material-icons" aria-hidden="true">explore</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="/report.html">
+            <span class="material-icons" aria-hidden="true">add_location_alt</span>
+            <span>Report an issue</span>
+          </a>
+        </nav>
+
+        <a class="btn btn-accent topbar-action" href="/report.html">
+          <span class="material-icons" aria-hidden="true">add</span>
+          <span>New report</span>
+        </a>
+      </header>
+
+      <main id="main">
+        <section class="dashboard-page">
+          <header class="page-heading">
+            <div class="heading-copy">
+              <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Community street watch</p>
+              <h1>Make every route<br><em>easier to take.</em></h1>
+              <p class="heading-description">
+                Find the barriers people encounter on foot, then help make them visible.
+              </p>
+            </div>
+            <a class="btn btn-accent heading-action" href="/report.html">
+              <span class="material-icons" aria-hidden="true">photo_camera</span>
+              <span>Report a barrier</span>
+            </a>
+          </header>
+
+          <section class="overview-grid" aria-label="Issue summary">
+            <article class="overview-card overview-total">
+              <div class="overview-icon" aria-hidden="true">
+                <span class="material-icons">location_on</span>
+              </div>
+              <div>
+                <span class="overview-label">Reports on the radar</span>
+                <strong id="stat-total">—</strong>
+              </div>
+              <span class="overview-note">community reports</span>
+            </article>
+
+            <article class="overview-card overview-high">
+              <div class="overview-icon" aria-hidden="true">
+                <span class="material-icons">priority_high</span>
+              </div>
+              <div>
+                <span class="overview-label">Needs attention</span>
+                <strong id="stat-high">—</strong>
+              </div>
+              <span class="overview-note">high severity</span>
+            </article>
+
+            <article class="overview-card overview-latest">
+              <div class="overview-icon" aria-hidden="true">
+                <span class="material-icons">schedule</span>
+              </div>
+              <div>
+                <span class="overview-label">Latest activity</span>
+                <strong id="stat-latest">—</strong>
+              </div>
+              <span class="overview-note">most recent report</span>
+            </article>
+          </section>
+
+          <section class="activity-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Field notes</p>
+                <h2>Recent reports</h2>
+              </div>
+              <div class="report-count">
+                <span class="count-line" aria-hidden="true"></span>
+                <span id="report-count">0 reports</span>
+              </div>
+            </div>
+
+            <div class="loading-state" id="loading-state" role="status">
+              <span class="spinner spinner-lg" aria-hidden="true"></span>
+              <span>Reading the latest street reports…</span>
+            </div>
+
+            <section class="error-state" id="error-state" role="alert" hidden>
+              <span class="material-icons" aria-hidden="true">cloud_off</span>
+              <div>
+                <h3>The radar could not load reports</h3>
+                <p>Check that the API and database are running, then try again.</p>
+              </div>
+              <button class="btn btn-stroked" type="button" id="retry-button">Try again</button>
+            </section>
+
+            <section class="empty-state" id="empty-state" hidden>
+              <div class="empty-illustration" aria-hidden="true">
+                <span class="empty-street"></span>
+                <span class="empty-pin"><span class="material-icons">add_location_alt</span></span>
+                <span class="empty-sun"></span>
+              </div>
+              <div class="empty-copy">
+                <p class="eyebrow">A clear map is a good start</p>
+                <h3>No reports yet</h3>
+                <p>Share a photo of a blocked ramp, broken sidewalk, or another barrier on your route.</p>
+                <a class="btn btn-accent" href="/report.html">
+                  <span class="material-icons" aria-hidden="true">add_a_photo</span>
+                  <span>Add the first report</span>
+                </a>
+              </div>
+            </section>
+
+            <div class="issue-grid" id="issue-grid" hidden></div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Every clear path starts with a report.</span>
+        <span class="footer-mark">
+          <span class="material-icons" aria-hidden="true">location_on</span>
+          Safer streets, block by block
+        </span>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <template id="issue-card-template">
+      <article class="issue-card">
+        <div class="issue-image">
+          <img alt="" loading="lazy" decoding="async">
+          <span class="severity-badge">
+            <span class="severity-dot" aria-hidden="true"></span>
+            <span class="severity-label"></span>
+          </span>
+        </div>
+        <div class="issue-body">
+          <div class="issue-meta">
+            <span class="issue-date"></span>
+            <span class="meta-divider" aria-hidden="true"></span>
+            <span>AI reviewed</span>
+          </div>
+          <h3 class="issue-title"></h3>
+          <p class="issue-description"></p>
+          <div class="issue-location">
+            <span class="material-icons" aria-hidden="true">near_me</span>
+            <span class="issue-coordinates"></span>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="/js/dashboard.js"></script>
+  </body>
+</html>
