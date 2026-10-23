@@ -17,18 +17,10 @@ const ATTRIBUTION =
  */
 const PROVIDERS: TileProvider[] = [
   {
-    url: 'https://tiles.openfreemap.org/planet/{z}/{x}/{y}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     options: {
       maxZoom: 19,
-      attribution: `${ATTRIBUTION} contributors &copy; <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>`
-    }
-  },
-  {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    options: {
-      subdomains: 'abcd',
-      maxZoom: 20,
-      attribution: `${ATTRIBUTION} contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>`
+      attribution: `${ATTRIBUTION} contributors`
     }
   },
   {
@@ -37,6 +29,14 @@ const PROVIDERS: TileProvider[] = [
       subdomains: 'abc',
       maxZoom: 19,
       attribution: `${ATTRIBUTION} contributors, tiles by <a href="https://www.hotosm.org/" target="_blank" rel="noopener">HOT</a>`
+    }
+  },
+  {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    options: {
+      subdomains: 'abcd',
+      maxZoom: 20,
+      attribution: `${ATTRIBUTION} contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>`
     }
   },
   {

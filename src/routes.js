@@ -40,7 +40,7 @@ function toSummary(document) {
     classification: document.classification ?? document.Classification ?? '',
     category,
     need: normalizeNeed(document.need ?? document.Need, category),
-    severity: document.severity ?? document.Severity ?? 'low',
+    severity: document.severity ?? document.Severity ?? 'low', 
     description: document.description ?? document.Description ?? '',
     latitude: document.latitude ?? document.Latitude ?? 0,
     longitude: document.longitude ?? document.Longitude ?? 0,
