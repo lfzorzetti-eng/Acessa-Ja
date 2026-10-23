@@ -1,6 +1,41 @@
 # Urban Accessibility Radar
 
-Aplicação full-stack para reportar barreiras de acessibilidade urbana. O usuário envia uma foto e a localização; a API analisa a imagem com a **OpenAI** (visão), classifica o problema, atribui uma severidade e salva o relatório no **MongoDB Atlas**.
+**Um radar colaborativo de barreiras de acessibilidade urbana.** Qualquer pessoa fotografa um problema no caminho, confirma a localização e publica um relatório. A IA analisa a imagem, descreve a barreira, classifica o tipo e atribui uma severidade. O resultado aparece em um painel público e fica disponível por API.
+
+## Sobre o projeto
+
+### O problema
+
+Calçadas quebradas, rampas obstruídas, pisos táteis ausentes e caminhos bloqueados não aparecem nos mapas tradicionais. Quem usa cadeira de rodas, carrinho de bebê, bengala ou tem mobilidade reduzida muitas vezes descobre a barreira só quando chega ao local. Para prefeituras e coletivos de acessibilidade, também falta um retrato atualizado e comparável da situação das calçadas.
+
+### A solução
+
+O projeto transforma uma foto de rua em um dado estruturado e utilizável. Em vez de um relato livre e difícil de comparar, cada envio gera:
+
+- uma **classificação curta** da barreira (por exemplo, `Broken sidewalk`, `Blocked curb ramp`, `Missing tactile paving` ou `Obstructed walkway`);
+- uma **severidade** (`low`, `medium` ou `high`);
+- uma **descrição** baseada apenas no que está visível na imagem;
+- a **localização** e a **foto** do problema.
+
+Esses dados podem alimentar mapas, aplicativos de rota, campanhas de advocacy e a priorização de reparos por órgãos públicos.
+
+### Como funciona
+
+1. A pessoa escolhe ou arrasta uma foto e confirma a localização.
+2. O Angular otimiza a imagem no navegador e envia para a API.
+3. A API usa a visão da OpenAI para classificar a barreira, gerar a descrição e atribuir a severidade.
+4. O relatório é salvo no MongoDB Atlas e aparece no painel público.
+5. A listagem, o envio e as imagens ficam disponíveis por API.
+
+### Diferenciais
+
+- **Relato em poucos segundos:** foto + localização, sem formulário longo.
+- **Dados comparáveis:** classificação, severidade e descrição padronizadas pela IA.
+- **Foco em barreiras reais:** o que está bloqueando o caminho, não apenas se um estabelecimento é acessível.
+- **Pronto para integrar:** API REST com listagem, envio e imagem, pensada para mapas, rotas e priorização de reparos.
+- **Web e responsivo:** não exige instalação de aplicativo.
+
+### Stack
 
 - **Frontend:** Angular 21 + Angular Material
 - **Backend:** Node.js 20.19+ + Express 5
@@ -313,3 +348,4 @@ npm run build:web       # build de produção do Angular
 ```
 
 > O frontend vanilla anterior foi preservado no histórico do Git na branch `node-vanilla`; a versão atual usa Angular.
+# Acessa-Ja
